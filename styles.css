@@ -254,6 +254,16 @@ body {
     border-radius: 10px;
     border: 3px solid white;
     box-shadow: 0 4px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.roommate-image {
+    cursor: pointer;
+}
+
+.roommate-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 .date-watermark {
@@ -327,6 +337,165 @@ body {
     border-left: 4px solid var(--mint-green);
     font-style: italic;
     color: #555;
+}
+
+/* 图片编辑功能样式 */
+.image-edit-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.roommate-card:hover .image-edit-overlay {
+    opacity: 1;
+}
+
+.image-upload {
+    display: none;
+}
+
+.edit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bright-yellow);
+    color: #333;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px var(--glow-color);
+    transition: all 0.3s ease;
+    border: 2px solid white;
+}
+
+.edit-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px var(--glow-color);
+    background: var(--jelly-purple);
+    color: white;
+}
+
+.edit-btn i {
+    font-size: 1.2rem;
+}
+
+.reset-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background: var(--jelly-purple);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(216, 180, 254, 0.3);
+    transition: all 0.3s ease;
+    border: 2px solid white;
+    margin-top: 5px;
+}
+
+.reset-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(216, 180, 254, 0.4);
+    background: #d63031;
+}
+
+.reset-btn i {
+    font-size: 1rem;
+}
+
+/* 图片上传成功后的动画效果 */
+.image-upload-success {
+    animation: imageUpdate 0.5s ease-in-out;
+}
+
+@keyframes imageUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* 图片预览样式 */
+.image-preview-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.preview-image-wrapper {
+    display: flex;
+    justify-content: center;
+    background: var(--milk-pink);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    border: 3px solid white;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.preview-info {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid var(--mint-green);
+}
+
+.preview-info p {
+    margin: 8px 0;
+    color: #333;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.preview-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.confirm-btn {
+    background: var(--bright-yellow);
+    color: #333;
+    box-shadow: 0 4px 15px var(--glow-color);
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--glow-color);
+}
+
+.cancel-btn {
+    background: var(--jelly-purple);
+    color: white;
+    box-shadow: 0 4px 15px rgba(216, 180, 254, 0.3);
+}
+
+.cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(216, 180, 254, 0.4);
 }
 
 /* 宠物窝模块 */

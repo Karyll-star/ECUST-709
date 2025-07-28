@@ -51,7 +51,12 @@ function initializeRoommateCards() {
     const cards = document.querySelectorAll('.roommate-card');
     
     cards.forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function(e) {
+            // 如果点击的是编辑按钮，不显示弹窗
+            if (e.target.closest('.edit-btn') || e.target.closest('.image-upload')) {
+                return;
+            }
+            
             playSound('click');
             addShakeEffect(this);
             
@@ -88,6 +93,189 @@ function initializeRoommateCards() {
             `);
         });
     });
+    
+    // 初始化图片上传功能
+    initializeImageUpload();
+}
+
+// 图片上传功能
+function initializeImageUpload() {
+    const imageUploads = document.querySelectorAll('.image-upload');
+    
+    imageUploads.forEach(upload => {
+        upload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // 验证文件类型
+                if (!file.type.startsWith('image/')) {
+                    showNotification('请选择图片文件！');
+                    return;
+                }
+                
+                // 验证文件大小（限制为5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('图片文件过大，请选择小于5MB的图片！');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const roommateType = upload.dataset.roommate;
+                    const roommateCard = upload.closest('.roommate-card');
+                    const image = roommateCard.querySelector('.roommate-image');
+                    
+                    // 显示图片预览弹窗
+                    showImagePreview(e.target.result, roommateType, image, roommateCard);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+}
+
+// 保存图片到本地存储
+function saveImageToLocalStorage(roommateType, imageData) {
+    try {
+        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
+        savedImages[roommateType] = imageData;
+        localStorage.setItem('roommateImages', JSON.stringify(savedImages));
+    } catch (error) {
+        console.log('保存图片失败:', error);
+    }
+}
+
+// 加载保存的图片
+function loadSavedImages() {
+    try {
+        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
+        
+        Object.keys(savedImages).forEach(roommateType => {
+            const roommateCard = document.querySelector(`[data-roommate="${roommateType}"]`);
+            if (roommateCard) {
+                const image = roommateCard.querySelector('.roommate-image');
+                image.src = savedImages[roommateType];
+            }
+        });
+    } catch (error) {
+        console.log('加载保存的图片失败:', error);
+    }
+}
+
+// 图片预览功能
+function showImagePreview(imageData, roommateType, imageElement, roommateCard) {
+    const previewContent = `
+        <h2>图片预览</h2>
+        <div class="image-preview-container">
+            <div class="preview-image-wrapper">
+                <img src="${imageData}" alt="预览图片" class="preview-image">
+            </div>
+            <div class="preview-info">
+                <p><strong>舍友类型:</strong> ${roommateType}</p>
+                <p><strong>图片尺寸:</strong> <span id="image-size">计算中...</span></p>
+                <p><strong>文件大小:</strong> <span id="file-size">计算中...</span></p>
+            </div>
+            <div class="preview-actions">
+                <button class="preview-btn confirm-btn" onclick="confirmImageUpdate('${imageData}', '${roommateType}', '${imageElement.id}', '${roommateCard.dataset.roommate}')">
+                    <i class="fas fa-check"></i> 确认使用
+                </button>
+                <button class="preview-btn cancel-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </div>
+        </div>
+    `;
+    
+    showModal(previewContent);
+    
+    // 计算图片信息
+    const img = new Image();
+    img.onload = function() {
+        document.getElementById('image-size').textContent = `${this.width} × ${this.height}`;
+        
+        // 计算文件大小
+        const base64Length = imageData.length;
+        const fileSizeKB = Math.round((base64Length * 0.75) / 1024);
+        document.getElementById('file-size').textContent = `${fileSizeKB} KB`;
+    };
+    img.src = imageData;
+}
+
+// 确认图片更新
+function confirmImageUpdate(imageData, roommateType, imageElementId, roommateTypeData) {
+    const imageElement = document.querySelector(`[data-roommate="${roommateTypeData}"] .roommate-image`);
+    const roommateCard = document.querySelector(`[data-roommate="${roommateTypeData}"]`);
+    
+    // 更新图片
+    imageElement.src = imageData;
+    
+    // 添加成功动画
+    imageElement.classList.add('image-upload-success');
+    setTimeout(() => {
+        imageElement.classList.remove('image-upload-success');
+    }, 500);
+    
+    // 播放成功音效
+    playSound('success');
+    
+    // 显示成功通知
+    showNotification(`${roommateType}的图片更新成功！`);
+    
+    // 更新日期水印
+    const dateWatermark = roommateCard.querySelector('.date-watermark');
+    const today = new Date();
+    const dateString = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+    dateWatermark.textContent = dateString;
+    
+    // 保存到本地存储
+    saveImageToLocalStorage(roommateType, imageData);
+    
+    // 关闭弹窗
+    closeModal();
+}
+
+// 重置舍友图片
+function resetRoommateImage(roommateType) {
+    const roommateCard = document.querySelector(`[data-roommate="${roommateType}"]`);
+    const image = roommateCard.querySelector('.roommate-image');
+    
+    // 默认图片URL
+    const defaultImages = {
+        '社恐': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=社恐',
+        '摸鱼': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=摸鱼',
+        '学霸': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=学霸',
+        '夜猫': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=夜猫'
+    };
+    
+    // 更新图片
+    image.src = defaultImages[roommateType];
+    
+    // 添加重置动画
+    image.classList.add('image-upload-success');
+    setTimeout(() => {
+        image.classList.remove('image-upload-success');
+    }, 500);
+    
+    // 播放音效
+    playSound('success');
+    
+    // 显示通知
+    showNotification(`${roommateType}的图片已重置为默认！`);
+    
+    // 更新日期水印
+    const dateWatermark = roommateCard.querySelector('.date-watermark');
+    const today = new Date();
+    const dateString = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+    dateWatermark.textContent = dateString;
+    
+    // 从本地存储中删除
+    try {
+        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
+        delete savedImages[roommateType];
+        localStorage.setItem('roommateImages', JSON.stringify(savedImages));
+    } catch (error) {
+        console.log('删除保存的图片失败:', error);
+    }
 }
 
 // 宠物功能
@@ -417,6 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化所有功能
     initializeRoommateCards();
+    loadSavedImages(); // 加载保存的图片
     initializePets();
     initializeBatteryMonitor();
     initializeRules();
