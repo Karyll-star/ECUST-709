@@ -280,21 +280,31 @@ function resetRoommateImage(roommateType) {
 
 // 宠物功能
 function initializePets() {
+    // 处理鱼缸和原有宠物
     const pets = document.querySelectorAll('.pet');
-    
     pets.forEach(pet => {
         pet.addEventListener('click', function() {
             const petType = this.dataset.pet;
-            const quote = this.querySelector('.pet-quote').textContent;
-            
+            const quote = this.querySelector('.pet-quote')?.textContent || '';
+            const realImg = this.dataset.real;
+            // 如果是鱼缸，弹窗显示真实图片
+            if (petType === 'fish1' || petType === 'fish2') {
+                showModal(`
+                    <h2>鱼缸${petType === 'fish1' ? '1号' : '2号'} - 真实照片</h2>
+                    <div style="text-align:center;">
+                        <img src="${realImg}" alt="鱼缸真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
+                        <div style="font-size:1.1rem;color:#4ECDC4;">${quote}</div>
+                    </div>
+                `);
+                return;
+            }
+            // 原有猫狗逻辑
             if (petType === 'cat') {
                 playSound('meow');
             } else if (petType === 'dog') {
                 playSound('bark');
             }
-            
             addShakeEffect(this);
-            
             showModal(`
                 <h2>宠物互动</h2>
                 <div class="pet-interaction">
@@ -309,13 +319,43 @@ function initializePets() {
                 </div>
             `);
         });
-        
-        // 添加浮动动画
-        setInterval(() => {
-            const randomX = Math.random() * 20 - 10;
-            const randomY = Math.random() * 20 - 10;
-            pet.style.transform = `translate(${randomX}px, ${randomY}px)`;
-        }, 3000);
+        // 初始化漂移动画
+        startPetDrift(pet);
+        // 鼠标悬停时加快眨眼动画
+        pet.addEventListener('mouseenter', function() {
+            const eyes = pet.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '1.2s';
+        });
+        pet.addEventListener('mouseleave', function() {
+            const eyes = pet.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '';
+        });
+    });
+    // 处理草盆
+    const plants = document.querySelectorAll('.plant');
+    plants.forEach(plant => {
+        plant.addEventListener('click', function() {
+            const plantType = this.dataset.plant;
+            const realImg = this.dataset.real;
+            const quote = this.querySelector('.plant-quote')?.textContent || '';
+            showModal(`
+                <h2>草盆${plantType === 'grass1' ? '1号' : '2号'} - 真实照片</h2>
+                <div style="text-align:center;">
+                    <img src="${realImg}" alt="草盆真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
+                    <div style="font-size:1.1rem;color:#27ae60;">${quote}</div>
+                </div>
+            `);
+        });
+        // 初始化漂移动画
+        startPlantDrift(plant);
+        plant.addEventListener('mouseenter', function() {
+            const eyes = plant.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '1.2s';
+        });
+        plant.addEventListener('mouseleave', function() {
+            const eyes = plant.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '';
+        });
     });
 }
 
@@ -383,30 +423,42 @@ function initializeBatteryMonitor() {
     });
 }
 
-// 舍规功能
-function initializeRules() {
-    const ruleItems = document.querySelectorAll('.rule-item');
+// 今日舍规数据池
+const dormRulesPool = [
+    { type: 'forbidden', icon: 'ban', text: '今天必须将袜子穿在手上' },
+    { type: 'suggestion', icon: 'lightbulb', text: '每位舍友必须讲一句二次元台词' },
+    { type: 'forbidden', icon: 'ban', text: '禁止与洗衣机谈恋爱' },
+    { type: 'suggestion', icon: 'lightbulb', text: '建议以猫耳发卡作为今日通行证' },
+    { type: 'forbidden', icon: 'ban', text: '禁止使用正常语气说话，必须角色扮演' },
+    { type: 'suggestion', icon: 'lightbulb', text: '建议以Saber为榜样完成学习任务' },
+    { type: 'forbidden', icon: 'ban', text: '禁止不对猫猫（或幻想中的猫猫）打招呼' },
+    { type: 'suggestion', icon: 'lightbulb', text: '建议将宿舍命名为“次元裂缝研究所”' },
+    { type: 'forbidden', icon: 'ban', text: '禁止忘记赞美初音未来' },
+    { type: 'suggestion', icon: 'lightbulb', text: '建议对镜自拍并加二次元滤镜后群发' },
+    // ……其余90条规则省略显示，可通过脚本或数据库加载
+    ];
     
-    ruleItems.forEach(rule => {
-        rule.addEventListener('click', function() {
-            playSound('click');
-            addFlashEffect(this);
-            
-            const ruleText = this.querySelector('span').textContent;
-            const isForbidden = this.classList.contains('forbidden');
-            
-            showModal(`
-                <h2>舍规详情</h2>
-                <div class="rule-detail">
-                    <p><strong>规则:</strong> ${ruleText}</p>
-                    <p><strong>类型:</strong> ${isForbidden ? '禁止类' : '建议类'}</p>
-                    <p><strong>说明:</strong> ${isForbidden ? '违反此规则将受到惩罚！' : '建议遵守此规则以维护寝室和谐！'}</p>
-                    ${isForbidden ? '<div class="warning-icon">⚠️</div>' : '<div class="suggestion-icon">💡</div>'}
-                </div>
-            `);
-        });
-    });
-}
+    function getRandomRuleOfDay() {
+    // 用日期做种子，保证每天只变一次
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    let idx = seed % dormRulesPool.length;
+    return dormRulesPool[idx];
+    }
+    
+    function renderRuleOfDay() {
+    const rule = getRandomRuleOfDay();
+    const rulesList = document.querySelector('.rules-list');
+    if (rulesList) {
+        rulesList.innerHTML = `
+            <div class="rule-item ${rule.type}">
+                <i class="fas fa-${rule.icon}"></i>
+                <span>${rule.text}</span>
+            </div>
+        `;
+    }
+    }
+    
 
 // 节日倒计时功能
 function initializeCountdown() {
@@ -587,6 +639,102 @@ function initializeNavigation() {
     });
 }
 
+// 新增：漂移动画函数，拖拽时暂停，松手后恢复
+function startPetDrift(pet) {
+    if (pet.driftTimer) clearInterval(pet.driftTimer);
+    pet.driftTimer = setInterval(() => {
+        if (pet.classList.contains('dragging')) return;
+        const randomX = Math.random() * 20 - 10;
+        const randomY = Math.random() * 20 - 10;
+        pet.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    }, 3000);
+}
+function startPlantDrift(plant) {
+    if (plant.driftTimer) clearInterval(plant.driftTimer);
+    plant.driftTimer = setInterval(() => {
+        if (plant.classList.contains('dragging')) return;
+        const randomX = Math.random() * 10 - 5;
+        const randomY = Math.random() * 10 - 5;
+        plant.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    }, 3500);
+}
+// 修改initializePets，初始化时调用漂移动画
+function initializePets() {
+    const pets = document.querySelectorAll('.pet');
+    pets.forEach(pet => {
+        pet.addEventListener('click', function() {
+            const petType = this.dataset.pet;
+            const quote = this.querySelector('.pet-quote')?.textContent || '';
+            const realImg = this.dataset.real;
+            if (petType === 'fish1' || petType === 'fish2') {
+                showModal(`
+                    <h2>鱼缸${petType === 'fish1' ? '1号' : '2号'} - 真实照片</h2>
+                    <div style="text-align:center;">
+                        <img src="${realImg}" alt="鱼缸真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
+                        <div style="font-size:1.1rem;color:#4ECDC4;">${quote}</div>
+                    </div>
+                `);
+                return;
+            }
+            if (petType === 'cat') {
+                playSound('meow');
+            } else if (petType === 'dog') {
+                playSound('bark');
+            }
+            addShakeEffect(this);
+            showModal(`
+                <h2>宠物互动</h2>
+                <div class="pet-interaction">
+                    <p><strong>宠物类型:</strong> ${petType === 'cat' ? '猫咪' : '狗狗'}</p>
+                    <p><strong>当前状态:</strong> 正在卖萌</p>
+                    <p><strong>说的话:</strong> ${quote}</p>
+                    <div class="pet-actions">
+                        <button onclick="feedPet('${petType}')">喂食</button>
+                        <button onclick="playWithPet('${petType}')">玩耍</button>
+                        <button onclick="petPet('${petType}')">抚摸</button>
+                    </div>
+                </div>
+            `);
+        });
+        // 初始化漂移动画
+        startPetDrift(pet);
+        // 鼠标悬停时加快眨眼动画
+        pet.addEventListener('mouseenter', function() {
+            const eyes = pet.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '1.2s';
+        });
+        pet.addEventListener('mouseleave', function() {
+            const eyes = pet.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '';
+        });
+    });
+    const plants = document.querySelectorAll('.plant');
+    plants.forEach(plant => {
+        plant.addEventListener('click', function() {
+            const plantType = this.dataset.plant;
+            const realImg = this.dataset.real;
+            const quote = this.querySelector('.plant-quote')?.textContent || '';
+            showModal(`
+                <h2>草盆${plantType === 'grass1' ? '1号' : '2号'} - 真实照片</h2>
+                <div style="text-align:center;">
+                    <img src="${realImg}" alt="草盆真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
+                    <div style="font-size:1.1rem;color:#27ae60;">${quote}</div>
+                </div>
+            `);
+        });
+        // 初始化漂移动画
+        startPlantDrift(plant);
+        plant.addEventListener('mouseenter', function() {
+            const eyes = plant.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '1.2s';
+        });
+        plant.addEventListener('mouseleave', function() {
+            const eyes = plant.querySelector('.eyes');
+            if (eyes) eyes.style.animationDuration = '';
+        });
+    });
+}
+
 // 关闭弹窗事件
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
@@ -612,6 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCountdown();
     initializeCharacterGenerator();
     initializeNavigation();
+    enablePetDragDrop(); // 启用宠物和植物的拖拽功能
     
     // 添加页面加载动画
     document.body.style.opacity = '0';

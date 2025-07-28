@@ -206,8 +206,14 @@ body {
 /* 舍友一览模块 */
 .roommates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px;
+    justify-items: center;
+}
+@media (max-width: 700px) {
+    .roommates-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .roommate-card {
@@ -557,15 +563,23 @@ body {
     transform: scale(1.1);
 }
 
+/* 贴纸式宠物样式增强 */
 .pet-sticker {
     width: 120px;
     height: 120px;
     background: var(--milk-pink);
     border-radius: 50%;
     position: relative;
-    box-shadow: 0 8px 25px var(--shadow-color);
+    box-shadow: 0 8px 25px var(--shadow-color), 0 0 0 6px #fff inset;
     border: 5px solid white;
     animation: float 3s ease-in-out infinite;
+    transition: box-shadow 0.3s, transform 0.2s;
+    overflow: visible;
+}
+.pet:active .pet-sticker, .pet.dragging .pet-sticker {
+    transform: scale(1.12) rotate(-6deg);
+    box-shadow: 0 12px 40px var(--jelly-purple), 0 0 0 8px #fff inset;
+    z-index: 10;
 }
 
 .pet-face {
@@ -576,63 +590,105 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 .eyes {
     position: absolute;
-    top: 30%;
+    top: 38%;
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: space-around;
+    z-index: 2;
 }
-
-.eyes::before,
-.eyes::after {
+.eyes::before, .eyes::after {
     content: '';
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
     background: #333;
     border-radius: 50%;
-    animation: blink 3s ease-in-out infinite;
+    box-shadow: 0 0 0 3px #fff;
+    animation: blink 3.5s infinite;
 }
-
-.cheeks {
-    position: absolute;
-    bottom: 25%;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
+.pet:hover .eyes::before, .pet:hover .eyes::after {
+    background: #222;
+    animation: blink 1.2s infinite;
 }
-
-.cheeks::before,
-.cheeks::after {
-    content: '';
-    width: 12px;
-    height: 8px;
-    background: #FFB6C1;
-    border-radius: 50%;
-    opacity: 0.6;
-}
-
-.paws {
-    position: absolute;
-    bottom: 10%;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-}
-
-.paws::before,
-.paws::after {
-    content: '';
-    width: 8px;
-    height: 12px;
-    background: #FFB6C1;
-    border-radius: 50%;
-}
-
 @keyframes blink {
     0%, 90%, 100% { transform: scaleY(1); }
-    95% { transform: scaleY(0.1); }
+    92% { transform: scaleY(0.1); }
+}
+.cheeks {
+    position: absolute;
+    bottom: 28%;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    z-index: 1;
+}
+.cheeks::before, .cheeks::after {
+    content: '';
+    width: 16px;
+    height: 10px;
+    background: #FFB6C1;
+    border-radius: 50%;
+    opacity: 0.7;
+    filter: blur(1px);
+}
+.paws {
+    position: absolute;
+    bottom: 8%;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    z-index: 2;
+}
+.paws::before, .paws::after {
+    content: '';
+    width: 12px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid #FFB6C1;
+    box-shadow: 0 2px 4px #ffd1dc88;
+}
+/* 鱼的尾巴动画 */
+.pet-fish .pet-sticker::after {
+    content: '';
+    position: absolute;
+    right: -24px;
+    bottom: 40px;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #B5EAD7 60%, #FFD1DC 100%);
+    border-radius: 60% 40% 60% 40%/60% 60% 40% 40%;
+    transform: rotate(-20deg);
+    z-index: 0;
+    animation: tail-swing 1.2s infinite alternate;
+    opacity: 0.7;
+}
+@keyframes tail-swing {
+    0% { transform: rotate(-20deg) scaleY(1); }
+    100% { transform: rotate(10deg) scaleY(0.9); }
+}
+/* 草的叶子动画 */
+.plant-grass .plant-sticker::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 30px;
+    height: 40px;
+    background: linear-gradient(135deg, #B5EAD7 60%, #D8B4FE 100%);
+    border-radius: 60% 40% 60% 40%/60% 60% 40% 40%;
+    transform: translateX(-50%) rotate(-10deg);
+    z-index: 0;
+    animation: leaf-sway 1.8s infinite alternate;
+    opacity: 0.6;
+}
+@keyframes leaf-sway {
+    0% { transform: translateX(-50%) rotate(-10deg) scaleY(1); }
+    100% { transform: translateX(-50%) rotate(10deg) scaleY(0.95); }
 }
 
 .pet-quote {
@@ -786,99 +842,6 @@ body {
 
 .history-item:last-child {
     border-bottom: none;
-}
-
-/* 今日舍规模块 */
-.rules-container {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
-.ai-dorm-leader {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: var(--milk-pink);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px var(--shadow-color);
-}
-
-.leader-avatar {
-    flex-shrink: 0;
-}
-
-.leader-avatar img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 4px solid white;
-    box-shadow: 0 4px 15px var(--shadow-color);
-}
-
-.leader-dialog {
-    flex: 1;
-    position: relative;
-}
-
-.leader-dialog::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 20px;
-    width: 0;
-    height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-right: 10px solid var(--milk-pink);
-}
-
-.dialog-content {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px var(--shadow-color);
-}
-
-.dialog-content h3 {
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.rules-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.rule-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.rule-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 4px 15px var(--shadow-color);
-}
-
-.rule-item.forbidden {
-    background: rgba(255, 107, 107, 0.1);
-    color: #d63031;
-}
-
-.rule-item.suggestion {
-    background: rgba(76, 175, 80, 0.1);
-    color: #27ae60;
-}
-
-.rule-item i {
-    font-size: 1.2rem;
 }
 
 /* 节日倒计时模块 */
@@ -1157,4 +1120,214 @@ body {
 
 .countdown-timer.final-day {
     animation: flash 0.5s ease-in-out infinite;
+} 
+
+/* 新宠物窝结构样式 */
+.pet-plant-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+.pet-block, .plant-block {
+    flex: 1 1 350px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 18px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    padding: 30px 20px 20px 20px;
+    margin: 0 10px;
+    min-width: 320px;
+    position: relative;
+}
+.block-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--jelly-purple);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 2px;
+}
+.pet-container, .plant-container {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-end;
+}
+.pet-fish .pet-sticker {
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(135deg, #B5EAD7 60%, #FFD1DC 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    border: 4px solid white;
+    margin-bottom: 10px;
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+}
+.pet-fish .pet-quote {
+    text-align: center;
+    margin-top: 5px;
+    color: #4ECDC4;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    padding: 4px 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+.plant-grass .plant-sticker {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, #B5EAD7 60%, #D8B4FE 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    border: 4px solid white;
+    margin-bottom: 10px;
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+}
+.plant-grass .plant-quote {
+    text-align: center;
+    margin-top: 5px;
+    color: #27ae60;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    padding: 4px 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+@media (max-width: 900px) {
+    .pet-plant-wrapper {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .pet-block, .plant-block {
+        min-width: unset;
+        margin: 0;
+    }
+    .pet-container, .plant-container {
+        gap: 20px;
+    }
+} 
+
+/* 拖拽时高亮 */
+.pet.dragging, .plant.dragging {
+    box-shadow: 0 0 30px 10px var(--bright-yellow), 0 8px 25px var(--shadow-color);
+    border: 3px dashed var(--jelly-purple);
+    z-index: 20;
+} 
+
+/* 炫酷大号今日舍规模块 */
+.rules-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 40px 0;
+    background: linear-gradient(120deg, var(--jelly-purple) 0%, var(--milk-pink) 100%);
+    border-radius: 30px;
+    box-shadow: 0 12px 40px var(--shadow-color);
+    position: relative;
+    min-height: 340px;
+    margin-bottom: 40px;
+}
+.ai-dorm-leader {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    background: rgba(255,255,255,0.95);
+    padding: 40px 50px;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px var(--shadow-color), 0 0 40px 10px var(--jelly-purple);
+    position: relative;
+    min-width: 420px;
+    min-height: 220px;
+    z-index: 2;
+    border: 4px solid var(--bright-yellow);
+    animation: pulse 2s infinite;
+}
+.leader-avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 6px solid var(--milk-pink);
+    box-shadow: 0 8px 32px var(--shadow-color), 0 0 20px 5px var(--jelly-purple);
+    background: var(--mint-green);
+}
+.leader-dialog {
+    flex: 1;
+    position: relative;
+    font-size: 1.3rem;
+    color: #333;
+}
+.leader-dialog::before {
+    left: -20px;
+    top: 40px;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-right: 20px solid var(--milk-pink);
+}
+.dialog-content {
+    background: linear-gradient(120deg, #fff8f5 60%, #ffd1dc 100%);
+    padding: 30px 30px 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    border-left: 8px solid var(--jelly-purple);
+    font-size: 1.2rem;
+}
+.dialog-content h3 {
+    font-size: 1.6rem;
+    color: var(--jelly-purple);
+    margin-bottom: 18px;
+    text-shadow: 1px 1px 0 white, 2px 2px 0 var(--shadow-color);
+}
+.rules-list {
+    gap: 18px;
+}
+.rule-item {
+    font-size: 1.15rem;
+    padding: 16px 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    border: 2px solid var(--mint-green);
+    background: rgba(255,255,255,0.85);
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+}
+.rule-item.forbidden {
+    background: linear-gradient(90deg, #ffd1dc 60%, #fff247 100%);
+    color: #d63031;
+    border-color: #ffd1dc;
+}
+.rule-item.suggestion {
+    background: linear-gradient(90deg, #b5ead7 60%, #fff247 100%);
+    color: #27ae60;
+    border-color: #b5ead7;
+}
+.rule-item i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+@media (max-width: 900px) {
+    .rules-container, .ai-dorm-leader {
+        flex-direction: column;
+        gap: 20px;
+        min-width: unset;
+        padding: 20px;
+    }
+    .leader-avatar img {
+        width: 80px;
+        height: 80px;
+    }
 } 
