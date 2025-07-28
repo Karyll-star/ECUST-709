@@ -209,6 +209,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     justify-items: center;
+    align-items: stretch;
 }
 @media (max-width: 700px) {
     .roommates-grid {
@@ -217,6 +218,12 @@ body {
 }
 
 .roommate-card {
+    width: 320px;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+    height: 100%;
     background: var(--milk-pink);
     border-radius: 15px;
     padding: 20px;
@@ -308,6 +315,13 @@ body {
 @keyframes twinkle {
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 1; transform: scale(1.2); }
+}
+
+.card-info {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .card-info h3 {
@@ -1152,9 +1166,9 @@ body {
 }
 .pet-container, .plant-container {
     display: flex;
-    gap: 40px;
     justify-content: center;
     align-items: flex-end;
+    gap: 60px;
 }
 .pet-fish .pet-sticker {
     width: 110px;
@@ -1330,4 +1344,97 @@ body {
         width: 80px;
         height: 80px;
     }
+} 
+
+/* 鱼缸效果样式 */
+.fish-tank {
+    position: relative;
+    width: 320px;
+    height: 200px;
+    margin: 0 auto 30px auto;
+    background: linear-gradient(180deg, #b5ead7 60%, #a0c4ff 100%);
+    border-radius: 40% 40% 50% 50%/60% 60% 40% 40%;
+    box-shadow: 0 8px 32px var(--shadow-color), 0 0 40px 10px #b5ead7aa;
+    overflow: hidden;
+    border: 6px solid #fff;
+    z-index: 1;
+}
+.water {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(180deg, #b5ead7 60%, #a0c4ff 100%);
+    opacity: 0.85;
+    z-index: 1;
+    pointer-events: none;
+    animation: water-move 4s linear infinite alternate;
+}
+@keyframes water-move {
+    0% { filter: blur(2px) brightness(1); }
+    100% { filter: blur(6px) brightness(1.05); }
+}
+.swim-fish {
+    position: absolute;
+    width: 48px;
+    height: 28px;
+    z-index: 2;
+    will-change: transform, left, top;
+    pointer-events: auto;
+    transition: left 0.5s linear, top 0.5s linear, transform 0.3s;
+}
+.swim-fish:hover {
+    filter: brightness(1.2) drop-shadow(0 0 8px #fff247cc);
+}
+.fish-body {
+    width: 32px;
+    height: 20px;
+    background: linear-gradient(90deg, #ffd1dc 60%, #b5ead7 100%);
+    border-radius: 50% 60% 60% 50%/60% 60% 40% 40%;
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    box-shadow: 0 2px 8px #b5ead7aa;
+}
+.fish-tail {
+    position: absolute;
+    right: 0;
+    top: 8px;
+    width: 18px;
+    height: 12px;
+    background: linear-gradient(120deg, #b5ead7 60%, #d8b4fe 100%);
+    border-radius: 60% 40% 60% 40%/60% 60% 40% 40%;
+    transform: rotate(-20deg);
+    animation: tail-swing 0.7s infinite alternate;
+}
+@keyframes tail-swing {
+    0% { transform: rotate(-20deg) scaleY(1); }
+    100% { transform: rotate(20deg) scaleY(0.85); }
+}
+.fish-eye {
+    position: absolute;
+    left: 18px;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #fff;
+} 
+
+.external-electricity-table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    width: 95%;
+    background: #fff8f5;
+    box-shadow: 0 2px 12px #b5ead7aa;
+}
+.external-electricity-table th, .external-electricity-table td {
+    border: 1px solid #b5ead7;
+    padding: 8px 12px;
+    text-align: center;
+}
+.external-electricity-table th {
+    background: #b5ead7;
+    color: #333;
 } 

@@ -436,17 +436,15 @@ const dormRulesPool = [
     { type: 'forbidden', icon: 'ban', text: '禁止忘记赞美初音未来' },
     { type: 'suggestion', icon: 'lightbulb', text: '建议对镜自拍并加二次元滤镜后群发' },
     // ……其余90条规则省略显示，可通过脚本或数据库加载
-    ];
-    
-    function getRandomRuleOfDay() {
+];
+function getRandomRuleOfDay() {
     // 用日期做种子，保证每天只变一次
     const today = new Date();
     const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
     let idx = seed % dormRulesPool.length;
     return dormRulesPool[idx];
-    }
-    
-    function renderRuleOfDay() {
+}
+function renderRuleOfDay() {
     const rule = getRandomRuleOfDay();
     const rulesList = document.querySelector('.rules-list');
     if (rulesList) {
@@ -457,8 +455,11 @@ const dormRulesPool = [
             </div>
         `;
     }
-    }
-    
+}
+function initializeRules() {
+    renderRuleOfDay();
+}
+
 
 // 节日倒计时功能
 function initializeCountdown() {
@@ -735,6 +736,218 @@ function initializePets() {
     });
 }
 
+// 拖拽功能实现
+function enablePetDragDrop() {
+    const draggables = document.querySelectorAll('.pet, .plant');
+    draggables.forEach(el => {
+        el.style.cursor = 'grab';
+        el.onmousedown = dragStart;
+        el.ontouchstart = dragStart;
+    });
+    let draggingEl = null, offsetX = 0, offsetY = 0, startRect = null;
+    function dragStart(e) {
+        e.preventDefault();
+        draggingEl = this;
+        draggingEl.classList.add('dragging');
+        draggingEl.style.pointerEvents = 'none';
+        startRect = draggingEl.getBoundingClientRect();
+        if (e.type === 'touchstart') {
+            offsetX = e.touches[0].clientX - startRect.left;
+            offsetY = e.touches[0].clientY - startRect.top;
+            document.ontouchmove = dragMove;
+            document.ontouchend = dragEnd;
+        } else {
+            offsetX = e.clientX - startRect.left;
+            offsetY = e.clientY - startRect.top;
+            document.onmousemove = dragMove;
+            document.onmouseup = dragEnd;
+        }
+        draggingEl.style.position = 'fixed';
+        draggingEl.style.left = startRect.left + 'px';
+        draggingEl.style.top = startRect.top + 'px';
+        draggingEl.style.zIndex = 9999;
+    }
+    function dragMove(e) {
+        let x, y;
+        if (e.type === 'touchmove') {
+            x = e.touches[0].clientX - offsetX;
+            y = e.touches[0].clientY - offsetY;
+        } else {
+            x = e.clientX - offsetX;
+            y = e.clientY - offsetY;
+        }
+        draggingEl.style.left = x + 'px';
+        draggingEl.style.top = y + 'px';
+    }
+    function dragEnd(e) {
+        draggingEl.classList.remove('dragging');
+        draggingEl.style.pointerEvents = '';
+        // 计算相对pet-room的位置
+        const petRoom = document.querySelector('.pet-room');
+        const roomRect = petRoom.getBoundingClientRect();
+        let x = parseInt(draggingEl.style.left) - roomRect.left;
+        let y = parseInt(draggingEl.style.top) - roomRect.top;
+        draggingEl.style.position = 'absolute';
+        draggingEl.style.left = x + 'px';
+        draggingEl.style.top = y + 'px';
+        petRoom.appendChild(draggingEl);
+        draggingEl.style.zIndex = '';
+        draggingEl = null;
+        document.onmousemove = null;
+        document.onmouseup = null;
+        document.ontouchmove = null;
+        document.ontouchend = null;
+    }
+}
+
+// 鱼缸小鱼动态游动动画
+function animateFishTank() {
+    const tank = document.querySelector('.fish-tank');
+    if (!tank) return;
+    const fishes = [
+        { el: document.getElementById('fish1'), dir: 1, y: 60, speed: 1.2, flip: false, lastX: 0 },
+        { el: document.getElementById('fish2'), dir: -1, y: 120, speed: 0.9, flip: true, lastX: 0 }
+    ];
+    const tankW = 320, tankH = 200, fishW = 48, fishH = 28, margin = 10;
+    let t = 0;
+    // 初始位置
+    fishes.forEach((fish, i) => {
+        if (fish.el) {
+            fish.el.style.left = (margin + (i * 60)) + 'px';
+            fish.el.style.top = (fish.y) + 'px';
+            fish.el.style.transform = 'scaleX(1)';
+            fish.lastX = margin + (i * 60);
+        }
+    });
+    function moveFish() {
+        t += 0.03;
+        fishes.forEach((fish, i) => {
+            if (!fish.el) return;
+            let range = tankW - fishW - margin * 2;
+            let x = Math.abs(Math.sin(t * fish.speed + i)) * range;
+            if (fish.dir < 0) x = range - x;
+            let y = fish.y + Math.sin(t * fish.speed + i * 1.5) * 10;
+            // 判断运动方向
+            let direction = (x > fish.lastX) ? 1 : -1;
+            fish.el.style.left = (x + margin) + 'px';
+            fish.el.style.top = y + 'px';
+            fish.el.style.transform = `scaleX(${direction})`;
+            fish.lastX = x;
+        });
+        requestAnimationFrame(moveFish);
+    }
+    moveFish();
+}
+
+function fetchElectricityDataAndDrawChart() {
+    const infoDiv = document.getElementById('electricity-info');
+    const chartCanvas = document.getElementById('electricity-chart');
+    if (!infoDiv || !chartCanvas) return;
+    infoDiv.textContent = '正在获取电量数据...';
+    fetch('https://karyll-star.github.io/ecust-electricity-statistics/data.js')
+        .then(res => res.text())
+        .then(js => {
+            // 兼容 data=[{time:...,kWh:...}] 格式
+            let arrMatch = js.match(/data\s*=\s*(\[.*?\]);/s);
+            if (!arrMatch) {
+                infoDiv.textContent = '未能解析电量数据';
+                return;
+            }
+            let dataArr = [];
+            try {
+                dataArr = JSON.parse(arrMatch[1]);
+            } catch {
+                infoDiv.textContent = '电量数据格式错误';
+                return;
+            }
+            if (!Array.isArray(dataArr) || dataArr.length === 0) {
+                infoDiv.textContent = '暂无电量数据';
+                return;
+            }
+            // 适配 {time, kWh} 格式
+            let dates = [], values = [];
+            dataArr.forEach(item => {
+                if (item.time && item.kWh !== undefined) {
+                    dates.push(item.time);
+                    values.push(Number(item.kWh));
+                }
+            });
+            if (dates.length === 0) {
+                infoDiv.textContent = '电量数据为空';
+                return;
+            }
+            // 展示最新电量
+            infoDiv.innerHTML = `<span>寝室当前剩余电量：<b style='color:#27ae60;'>${values[values.length-1]}</b> 度</span>`;
+            // 绘制折线图
+            drawElectricityChart(chartCanvas, dates, values);
+        })
+        .catch(() => {
+            infoDiv.textContent = '无法获取电量数据（网络或CORS问题）';
+        });
+}
+
+function drawElectricityChart(canvas, labels, data) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // 适配高DPI
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = 600 * dpr;
+    canvas.height = 300 * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 坐标轴
+    const w = 600, h = 300, pad = 40;
+    ctx.strokeStyle = '#b5ead7';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(pad, pad);
+    ctx.lineTo(pad, h-pad);
+    ctx.lineTo(w-pad, h-pad);
+    ctx.stroke();
+    // 计算数据范围
+    const minV = Math.min(...data), maxV = Math.max(...data);
+    const range = maxV - minV || 1;
+    // 绘制折线
+    ctx.strokeStyle = '#27ae60';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    data.forEach((v, i) => {
+        const x = pad + (w-2*pad) * (i/(data.length-1));
+        const y = h-pad - (h-2*pad) * ((v-minV)/range);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // 绘制点
+    ctx.fillStyle = '#ffd1dc';
+    data.forEach((v, i) => {
+        const x = pad + (w-2*pad) * (i/(data.length-1));
+        const y = h-pad - (h-2*pad) * ((v-minV)/range);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2*Math.PI);
+        ctx.fill();
+    });
+    // 绘制最新点高亮
+    ctx.fillStyle = '#d63031';
+    const lastX = pad + (w-2*pad) * ((data.length-1)/(data.length-1));
+    const lastY = h-pad - (h-2*pad) * ((data[data.length-1]-minV)/range);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 6, 0, 2*Math.PI);
+    ctx.fill();
+    // 绘制标签
+    ctx.fillStyle = '#333';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    for (let i=0; i<labels.length; i+=Math.ceil(labels.length/7)) {
+        const x = pad + (w-2*pad) * (i/(labels.length-1));
+        ctx.fillText(labels[i], x, h-pad+20);
+    }
+    // Y轴刻度
+    ctx.textAlign = 'right';
+    ctx.fillText(maxV.toFixed(1), pad-5, pad+5);
+    ctx.fillText(minV.toFixed(1), pad-5, h-pad+5);
+}
+
 // 关闭弹窗事件
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
@@ -761,6 +974,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharacterGenerator();
     initializeNavigation();
     enablePetDragDrop(); // 启用宠物和植物的拖拽功能
+    animateFishTank(); // 启动鱼缸动画
+    fetchElectricityDataAndDrawChart(); // 只用data.js数据
     
     // 添加页面加载动画
     document.body.style.opacity = '0';

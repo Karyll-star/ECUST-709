@@ -171,29 +171,20 @@
                     <div class="snack-bag"></div>
                 </div>
                 <div class="pet-plant-wrapper">
-                    <!-- 动物区 -->
+                    <!-- 鱼缸区 -->
                     <div class="pet-block">
-                        <div class="block-title"><i class="fas fa-fish"></i> 动物区</div>
-                        <div class="pet-container">
-                            <div class="pet pet-fish" data-pet="fish1" data-real="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80">
-                                <div class="pet-sticker">
-                                    <div class="pet-face">
-                                        <div class="eyes"></div>
-                                        <div class="cheeks"></div>
-                                        <div class="paws"></div>
-                                    </div>
-                                </div>
-                                <div class="pet-quote">にゃん鱼1号</div>
+                        <div class="block-title"><i class="fas fa-fish"></i> 鱼缸</div>
+                        <div class="fish-tank">
+                            <div class="water"></div>
+                            <div class="swim-fish" id="fish1">
+                                <div class="fish-body"></div>
+                                <div class="fish-tail"></div>
+                                <div class="fish-eye"></div>
                             </div>
-                            <div class="pet pet-fish" data-pet="fish2" data-real="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80">
-                                <div class="pet-sticker">
-                                    <div class="pet-face">
-                                        <div class="eyes"></div>
-                                        <div class="cheeks"></div>
-                                        <div class="paws"></div>
-                                    </div>
-                                </div>
-                                <div class="pet-quote">にゃん鱼2号</div>
+                            <div class="swim-fish" id="fish2">
+                                <div class="fish-body"></div>
+                                <div class="fish-tail"></div>
+                                <div class="fish-eye"></div>
                             </div>
                         </div>
                     </div>
@@ -243,6 +234,8 @@
                     </div>
                     <div class="spell-text">エネルギー</div>
                 </div>
+                <div id="electricity-info" style="margin: 20px 0 0 0; text-align: center; font-size: 1.2rem; color: #333;"></div>
+                <canvas id="electricity-chart" style="width:100%;max-width:600px;height:300px;margin:20px auto;display:block;"></canvas>
                 <div class="battery-controls">
                     <input type="file" id="csvUpload" accept=".csv" class="csv-upload">
                     <label for="csvUpload" class="upload-btn">上传电量数据</label>
