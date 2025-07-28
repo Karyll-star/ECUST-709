@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>709寝室宇宙 - 日系二次元寝室日常</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 动态波浪背景 -->
+    <div class="wave-background">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-home"></i>
+                <span>709寝室宇宙</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#roommates" class="nav-link">舍友一览</a>
+                <a href="#pets" class="nav-link">宠物窝</a>
+                <a href="#battery" class="nav-link">电量监控</a>
+                <a href="#rules" class="nav-link">今日舍规</a>
+                <a href="#countdown" class="nav-link">节日倒计时</a>
+                <a href="#generator" class="nav-link">身份生成器</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 舍友一览模块 -->
+        <section id="roommates" class="section">
+            <h2 class="section-title">
+                <span class="title-text">舍友一览</span>
+                <span class="sound-effect">バカ！</span>
+                <i class="fas fa-hammer"></i>
+            </h2>
+            <div class="roommates-grid">
+                <div class="roommate-card" data-roommate="社恐">
+                    <div class="card-photo">
+                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=社恐" alt="社恐舍友">
+                        <div class="date-watermark">2024.01.15</div>
+                        <div class="star-effect"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>社恐小A</h3>
+                        <p class="status">状态：躲在被窝里</p>
+                        <div class="power-stats">
+                            <span>战斗力: 5</span>
+                            <span>摸鱼指数: 9</span>
+                        </div>
+                    </div>
+                    <div class="card-quote">
+                        <p>"不要看我...不要和我说话..."</p>
+                    </div>
+                </div>
+
+                <div class="roommate-card" data-roommate="摸鱼">
+                    <div class="card-photo">
+                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=摸鱼" alt="摸鱼舍友">
+                        <div class="date-watermark">2024.01.15</div>
+                        <div class="star-effect"></div>
+                        <div class="zzz-effect">zzz</div>
+                    </div>
+                    <div class="card-info">
+                        <h3>摸鱼小B</h3>
+                        <p class="status">状态：假装在学习</p>
+                        <div class="power-stats">
+                            <span>战斗力: 3</span>
+                            <span>摸鱼指数: 10</span>
+                        </div>
+                    </div>
+                    <div class="card-quote">
+                        <p>"我在学习...真的..."</p>
+                    </div>
+                </div>
+
+                <div class="roommate-card" data-roommate="学霸">
+                    <div class="card-photo">
+                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=学霸" alt="学霸舍友">
+                        <div class="date-watermark">2024.01.15</div>
+                        <div class="star-effect"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>学霸小C</h3>
+                        <p class="status">状态：图书馆闭关中</p>
+                        <div class="power-stats">
+                            <span>战斗力: 8</span>
+                            <span>摸鱼指数: 2</span>
+                        </div>
+                    </div>
+                    <div class="card-quote">
+                        <p>"这道题很简单啊..."</p>
+                    </div>
+                </div>
+
+                <div class="roommate-card" data-roommate="夜猫">
+                    <div class="card-photo">
+                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=夜猫" alt="夜猫舍友">
+                        <div class="date-watermark">2024.01.15</div>
+                        <div class="star-effect"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>夜猫小D</h3>
+                        <p class="status">状态：深夜修仙</p>
+                        <div class="power-stats">
+                            <span>战斗力: 7</span>
+                            <span>摸鱼指数: 6</span>
+                        </div>
+                    </div>
+                    <div class="card-quote">
+                        <p>"夜晚才是我的主场！"</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 宠物窝模块 -->
+        <section id="pets" class="section">
+            <h2 class="section-title">
+                <span class="title-text">宠物窝</span>
+                <span class="sound-effect">にゃあ！</span>
+            </h2>
+            <div class="pet-room">
+                <div class="room-decoration">
+                    <div class="manga-books"></div>
+                    <div class="snack-bag"></div>
+                </div>
+                <div class="pet-container">
+                    <div class="pet pet-cat" data-pet="cat">
+                        <div class="pet-sticker">
+                            <div class="pet-face">
+                                <div class="eyes"></div>
+                                <div class="cheeks"></div>
+                                <div class="paws"></div>
+                            </div>
+                        </div>
+                        <div class="pet-quote">にゃあ！見てるの、変態？！</div>
+                    </div>
+                    <div class="pet pet-dog" data-pet="dog">
+                        <div class="pet-sticker">
+                            <div class="pet-face">
+                                <div class="eyes"></div>
+                                <div class="cheeks"></div>
+                                <div class="paws"></div>
+                            </div>
+                        </div>
+                        <div class="pet-quote">わん！お前、ちゃんとご飯持ってきた？</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 电量监控模块 -->
+        <section id="battery" class="section">
+            <h2 class="section-title">
+                <span class="title-text">电量监控</span>
+                <span class="sound-effect">エネルギー</span>
+            </h2>
+            <div class="battery-monitor">
+                <div class="magic-circle">
+                    <div class="crystal-battery">
+                        <div class="battery-level" id="batteryLevel">
+                            <div class="battery-fill"></div>
+                            <span class="battery-text">85%</span>
+                        </div>
+                    </div>
+                    <div class="spell-text">エネルギー</div>
+                </div>
+                <div class="battery-controls">
+                    <input type="file" id="csvUpload" accept=".csv" class="csv-upload">
+                    <label for="csvUpload" class="upload-btn">上传电量数据</label>
+                    <div class="battery-history">
+                        <h3>电量历史</h3>
+                        <div class="history-item">
+                            <span class="time">7月停电事件</span>
+                            <span class="description">举手机照明四人画面</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 今日舍规模块 -->
+        <section id="rules" class="section">
+            <h2 class="section-title">
+                <span class="title-text">今日舍规</span>
+                <span class="sound-effect">きをつけてね～</span>
+            </h2>
+            <div class="rules-container">
+                <div class="ai-dorm-leader">
+                    <div class="leader-avatar">
+                        <img src="https://via.placeholder.com/80x80/FFD1DC/FFFFFF?text=AI" alt="AI舍长">
+                    </div>
+                    <div class="leader-dialog">
+                        <div class="dialog-content">
+                            <h3>今日舍规</h3>
+                            <div class="rules-list">
+                                <div class="rule-item forbidden">
+                                    <i class="fas fa-ban"></i>
+                                    <span>禁止和台灯吵架超过5分钟</span>
+                                </div>
+                                <div class="rule-item suggestion">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>建议每天至少笑一次</span>
+                                </div>
+                                <div class="rule-item forbidden">
+                                    <i class="fas fa-ban"></i>
+                                    <span>禁止在凌晨3点唱歌</span>
+                                </div>
+                                <div class="rule-item suggestion">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>建议分享零食给室友</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 节日倒计时模块 -->
+        <section id="countdown" class="section">
+            <h2 class="section-title">
+                <span class="title-text">节日倒计时</span>
+            </h2>
+            <div class="countdown-container">
+                <div class="countdown-item">
+                    <div class="countdown-icon">
+                        <img src="https://via.placeholder.com/60x60/FFD1DC/FFFFFF?text=初音" alt="初音未来日">
+                    </div>
+                    <div class="countdown-info">
+                        <h3>初音未来日</h3>
+                        <div class="countdown-timer" data-date="2024-03-09">
+                            <span class="days">00</span>天
+                            <span class="hours">00</span>时
+                            <span class="minutes">00</span>分
+                        </div>
+                    </div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-icon">
+                        <img src="https://via.placeholder.com/60x60/FFD1DC/FFFFFF?text=内裤" alt="寝室内裤日">
+                    </div>
+                    <div class="countdown-info">
+                        <h3>寝室内裤日</h3>
+                        <div class="countdown-timer" data-date="2024-02-14">
+                            <span class="days">00</span>天
+                            <span class="hours">00</span>时
+                            <span class="minutes">00</span>分
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 寝室身份生成器模块 -->
+        <section id="generator" class="section">
+            <h2 class="section-title">
+                <span class="title-text">キャラクター生成</span>
+                <span class="sound-effect">ワクワク！</span>
+            </h2>
+            <div class="generator-container">
+                <div class="generator-controls">
+                    <select id="personalityType" class="personality-select">
+                        <option value="chunibyo">中二系</option>
+                        <option value="cyber">赛博系</option>
+                        <option value="tsundere">傲娇系</option>
+                        <option value="yandere">病娇系</option>
+                    </select>
+                    <button id="generateBtn" class="generate-btn">生成身份</button>
+                </div>
+                <div class="character-card" id="characterCard">
+                    <div class="card-header">
+                        <div class="character-title">点击生成你的身份</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="character-attributes">
+                            <div class="attribute">
+                                <span class="attr-label">技能:</span>
+                                <span class="attr-value" id="skillValue">-</span>
+                            </div>
+                            <div class="attribute">
+                                <span class="attr-label">弱点:</span>
+                                <span class="attr-value" id="weaknessValue">-</span>
+                            </div>
+                            <div class="attribute">
+                                <span class="attr-label">特殊能力:</span>
+                                <span class="attr-value" id="specialValue">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 弹窗组件 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">逃げる！</span>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 音效和动画脚本 -->
+    <script src="script.js"></script>
+</body>
+</html> 
