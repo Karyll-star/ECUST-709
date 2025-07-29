@@ -379,25 +379,118 @@ function initializeBatteryMonitor() {
     const batteryLevel = document.getElementById('batteryLevel');
     const batteryFill = batteryLevel.querySelector('.battery-fill');
     const batteryText = batteryLevel.querySelector('.battery-text');
+    const electricityChartCanvas = document.getElementById('electricity-chart');
     
-    // 模拟电量变化
-    setInterval(() => {
-        currentBatteryLevel += (Math.random() - 0.5) * 2;
-        currentBatteryLevel = Math.max(0, Math.min(100, currentBatteryLevel));
-        
-        batteryFill.style.width = `${currentBatteryLevel}%`;
-        batteryText.textContent = `${Math.round(currentBatteryLevel)}%`;
-        
-        // 低电量警告
-        if (currentBatteryLevel < 20) {
-            batteryLevel.classList.add('low-battery');
-            playSound('warning');
-            showNotification('电量不足！请及时充电！');
-        } else {
-            batteryLevel.classList.remove('low-battery');
+    // 从 GitHub 获取电量数据
+    fetch('https://raw.githubusercontent.com/Karyll-star/ecust-electricity-statistics/main/data.js')
+        .then(response => response.text())
+        .then(data => {
+            // 解析数据
+            const parsedData = parseElectricityData(data);
+            
+            // 绘制折线图
+            drawElectricityChart(electricityChartCanvas, parsedData);
+            
+            // 更新当前电量
+            if (parsedData.length > 0) {
+                const latestData = parsedData[parsedData.length - 1];
+                currentBatteryLevel = latestData.value;
+                batteryFill.style.width = `${currentBatteryLevel}%`;
+                batteryText.textContent = `${Math.round(currentBatteryLevel)}%`;
+                
+                // 低电量警告
+                if (currentBatteryLevel < 20) {
+                    batteryLevel.classList.add('low-battery');
+                    playSound('warning');
+                    showNotification('电量不足！请及时充电！');
+                } else {
+                    batteryLevel.classList.remove('low-battery');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('获取电量数据失败:', error);
+            // 使用模拟数据作为备用
+            setInterval(() => {
+                currentBatteryLevel += (Math.random() - 0.5) * 2;
+                currentBatteryLevel = Math.max(0, Math.min(100, currentBatteryLevel));
+                
+                batteryFill.style.width = `${currentBatteryLevel}%`;
+                batteryText.textContent = `${Math.round(currentBatteryLevel)}%`;
+                
+                if (currentBatteryLevel < 20) {
+                    batteryLevel.classList.add('low-battery');
+                    playSound('warning');
+                    showNotification('电量不足！请及时充电！');
+                } else {
+                    batteryLevel.classList.remove('low-battery');
+                }
+            }, 2000);
+        });
+}
+
+// 解析电量数据
+function parseElectricityData(data) {
+    // 提取数据部分（假设数据格式为 `const electricityData = [...]`）
+    const dataMatch = data.match(/const electricityData = (\[.*?\]);/s);
+    if (dataMatch && dataMatch[1]) {
+        try {
+            return JSON.parse(dataMatch[1]);
+        } catch (error) {
+            console.error('解析电量数据失败:', error);
+            return [];
         }
-        
-        // 根据电量改变颜色
+    }
+    return [];
+}
+
+// 绘制电量折线图
+function drawElectricityChart(canvas, data) {
+    if (!data || data.length === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    const labels = data.map(item => item.date);
+    const values = data.map(item => item.value);
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '电量 (%)',
+                data: values,
+                borderColor: '#B5EAD7',
+                backgroundColor: 'rgba(181, 234, 215, 0.2)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `${context.dataset.label}: ${context.raw}%`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        callback: (value) => `${value}%`
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 根据电量改变颜色
         if (currentBatteryLevel > 60) {
             batteryFill.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
         } else if (currentBatteryLevel > 30) {
