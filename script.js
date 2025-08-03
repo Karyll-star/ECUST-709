@@ -1,5 +1,4 @@
 // 全局变量
-let currentBatteryLevel = 85;
 let countdownTimers = {};
 
 // 音效系统
@@ -53,7 +52,7 @@ function initializeRoommateCards() {
     cards.forEach(card => {
         card.addEventListener('click', function(e) {
             // 如果点击的是编辑按钮，不显示弹窗
-            if (e.target.closest('.edit-btn') || e.target.closest('.image-upload')) {
+            if (e.target.closest('.edit-btn') || e.target.closest('.image-link')) {
                 return;
             }
             
@@ -94,44 +93,58 @@ function initializeRoommateCards() {
         });
     });
     
-    // 初始化图片上传功能
-    initializeImageUpload();
+    // 初始化图片链接功能
+    initializeImageLink();
 }
 
-// 图片上传功能
-function initializeImageUpload() {
-    const imageUploads = document.querySelectorAll('.image-upload');
+// 图片链接功能
+function initializeImageLink() {
+    const imageLinks = document.querySelectorAll('.image-link');
     
-    imageUploads.forEach(upload => {
-        upload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // 验证文件类型
-                if (!file.type.startsWith('image/')) {
-                    showNotification('请选择图片文件！');
-                    return;
-                }
-                
-                // 验证文件大小（限制为5MB）
-                if (file.size > 5 * 1024 * 1024) {
-                    showNotification('图片文件过大，请选择小于5MB的图片！');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const roommateType = upload.dataset.roommate;
-                    const roommateCard = upload.closest('.roommate-card');
+    imageLinks.forEach(link => {
+        link.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const imageUrl = this.value.trim();
+                if (imageUrl) {
+                    // 验证URL格式
+                    if (!isValidImageUrl(imageUrl)) {
+                        showNotification('请输入有效的图片链接！');
+                        return;
+                    }
+                    
+                    const roommateType = link.dataset.roommate;
+                    const roommateCard = link.closest('.roommate-card');
                     const image = roommateCard.querySelector('.roommate-image');
                     
                     // 显示图片预览弹窗
-                    showImagePreview(e.target.result, roommateType, image, roommateCard);
-                };
-                
-                reader.readAsDataURL(file);
+                    showImagePreview(imageUrl, roommateType, image, roommateCard);
+                    
+                    // 清空输入框
+                    this.value = '';
+                }
             }
         });
+        
+        // 点击编辑按钮时聚焦到输入框
+        const editBtn = link.nextElementSibling;
+        if (editBtn) {
+            editBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                link.style.display = 'block';
+                link.focus();
+            });
+        }
     });
+}
+
+// 验证图片URL
+function isValidImageUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+        return false;
+    }
 }
 
 // 保存图片到本地存储
@@ -163,20 +176,23 @@ function loadSavedImages() {
 }
 
 // 图片预览功能
-function showImagePreview(imageData, roommateType, imageElement, roommateCard) {
+function showImagePreview(imageUrl, roommateType, imageElement, roommateCard) {
     const previewContent = `
         <h2>图片预览</h2>
         <div class="image-preview-container">
             <div class="preview-image-wrapper">
-                <img src="${imageData}" alt="预览图片" class="preview-image">
+                <img src="${imageUrl}" alt="预览图片" class="preview-image" onerror="this.style.display='none'; document.getElementById('preview-error').style.display='block';">
+                <div id="preview-error" style="display:none; color:red; text-align:center; padding:20px;">
+                    图片加载失败，请检查链接是否正确
+                </div>
             </div>
             <div class="preview-info">
                 <p><strong>舍友类型:</strong> ${roommateType}</p>
+                <p><strong>图片链接:</strong> <span style="word-break:break-all;">${imageUrl}</span></p>
                 <p><strong>图片尺寸:</strong> <span id="image-size">计算中...</span></p>
-                <p><strong>文件大小:</strong> <span id="file-size">计算中...</span></p>
             </div>
             <div class="preview-actions">
-                <button class="preview-btn confirm-btn" onclick="confirmImageUpdate('${imageData}', '${roommateType}', '${imageElement.id}', '${roommateCard.dataset.roommate}')">
+                <button class="preview-btn confirm-btn" onclick="confirmImageUpdate('${imageUrl}', '${roommateType}', '${imageElement.id}', '${roommateCard.dataset.roommate}')">
                     <i class="fas fa-check"></i> 确认使用
                 </button>
                 <button class="preview-btn cancel-btn" onclick="closeModal()">
@@ -192,27 +208,25 @@ function showImagePreview(imageData, roommateType, imageElement, roommateCard) {
     const img = new Image();
     img.onload = function() {
         document.getElementById('image-size').textContent = `${this.width} × ${this.height}`;
-        
-        // 计算文件大小
-        const base64Length = imageData.length;
-        const fileSizeKB = Math.round((base64Length * 0.75) / 1024);
-        document.getElementById('file-size').textContent = `${fileSizeKB} KB`;
     };
-    img.src = imageData;
+    img.onerror = function() {
+        document.getElementById('image-size').textContent = '无法获取';
+    };
+    img.src = imageUrl;
 }
 
 // 确认图片更新
-function confirmImageUpdate(imageData, roommateType, imageElementId, roommateTypeData) {
+function confirmImageUpdate(imageUrl, roommateType, imageElementId, roommateTypeData) {
     const imageElement = document.querySelector(`[data-roommate="${roommateTypeData}"] .roommate-image`);
     const roommateCard = document.querySelector(`[data-roommate="${roommateTypeData}"]`);
     
     // 更新图片
-    imageElement.src = imageData;
+    imageElement.src = imageUrl;
     
     // 添加成功动画
-    imageElement.classList.add('image-upload-success');
+    imageElement.classList.add('image-link-success');
     setTimeout(() => {
-        imageElement.classList.remove('image-upload-success');
+        imageElement.classList.remove('image-link-success');
     }, 500);
     
     // 播放成功音效
@@ -228,7 +242,7 @@ function confirmImageUpdate(imageData, roommateType, imageElementId, roommateTyp
     dateWatermark.textContent = dateString;
     
     // 保存到本地存储
-    saveImageToLocalStorage(roommateType, imageData);
+    saveImageToLocalStorage(roommateType, imageUrl);
     
     // 关闭弹窗
     closeModal();
@@ -241,19 +255,19 @@ function resetRoommateImage(roommateType) {
     
     // 默认图片URL
     const defaultImages = {
-        '社恐': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=社恐',
-        '摸鱼': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=摸鱼',
-        '学霸': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=学霸',
-        '夜猫': 'https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=夜猫'
+        '社恐': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
+        '摸鱼': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
+        '学霸': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
+        '夜猫': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4='
     };
     
     // 更新图片
     image.src = defaultImages[roommateType];
     
     // 添加重置动画
-    image.classList.add('image-upload-success');
+    image.classList.add('image-link-success');
     setTimeout(() => {
-        image.classList.remove('image-upload-success');
+        image.classList.remove('image-link-success');
     }, 500);
     
     // 播放音效
@@ -346,8 +360,6 @@ function initializePets() {
                 </div>
             `);
         });
-        // 初始化漂移动画
-        startPlantDrift(plant);
         plant.addEventListener('mouseenter', function() {
             const eyes = plant.querySelector('.eyes');
             if (eyes) eyes.style.animationDuration = '1.2s';
@@ -374,147 +386,12 @@ function petPet(petType) {
     showNotification(`${petType === 'cat' ? '猫咪' : '狗狗'}被摸得很舒服！`);
 }
 
-// 电量监控功能
-function initializeBatteryMonitor() {
-    const batteryLevel = document.getElementById('batteryLevel');
-    const batteryFill = batteryLevel.querySelector('.battery-fill');
-    const batteryText = batteryLevel.querySelector('.battery-text');
-    const electricityChartCanvas = document.getElementById('electricity-chart');
-    
-    // 从 GitHub 获取电量数据
-    fetch('https://raw.githubusercontent.com/Karyll-star/ecust-electricity-statistics/main/data.js')
-        .then(response => response.text())
-        .then(data => {
-            // 解析数据
-            const parsedData = parseElectricityData(data);
-            
-            // 绘制折线图
-            drawElectricityChart(electricityChartCanvas, parsedData);
-            
-            // 更新当前电量
-            if (parsedData.length > 0) {
-                const latestData = parsedData[parsedData.length - 1];
-                currentBatteryLevel = latestData.value;
-                batteryFill.style.width = `${currentBatteryLevel}%`;
-                batteryText.textContent = `${Math.round(currentBatteryLevel)}%`;
-                
-                // 低电量警告
-                if (currentBatteryLevel < 20) {
-                    batteryLevel.classList.add('low-battery');
-                    playSound('warning');
-                    showNotification('电量不足！请及时充电！');
-                } else {
-                    batteryLevel.classList.remove('low-battery');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('获取电量数据失败:', error);
-            // 使用模拟数据作为备用
-            setInterval(() => {
-                currentBatteryLevel += (Math.random() - 0.5) * 2;
-                currentBatteryLevel = Math.max(0, Math.min(100, currentBatteryLevel));
-                
-                batteryFill.style.width = `${currentBatteryLevel}%`;
-                batteryText.textContent = `${Math.round(currentBatteryLevel)}%`;
-                
-                if (currentBatteryLevel < 20) {
-                    batteryLevel.classList.add('low-battery');
-                    playSound('warning');
-                    showNotification('电量不足！请及时充电！');
-                } else {
-                    batteryLevel.classList.remove('low-battery');
-                }
-            }, 2000);
-        });
-}
 
-// 解析电量数据
-function parseElectricityData(data) {
-    // 提取数据部分（假设数据格式为 `const electricityData = [...]`）
-    const dataMatch = data.match(/const electricityData = (\[.*?\]);/s);
-    if (dataMatch && dataMatch[1]) {
-        try {
-            return JSON.parse(dataMatch[1]);
-        } catch (error) {
-            console.error('解析电量数据失败:', error);
-            return [];
-        }
-    }
-    return [];
-}
 
-// 绘制电量折线图
-function drawElectricityChart(canvas, data) {
-    if (!data || data.length === 0) return;
-    
-    const ctx = canvas.getContext('2d');
-    const labels = data.map(item => item.date);
-    const values = data.map(item => item.value);
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: '电量 (%)',
-                data: values,
-                borderColor: '#B5EAD7',
-                backgroundColor: 'rgba(181, 234, 215, 0.2)',
-                borderWidth: 2,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (context) => `${context.dataset.label}: ${context.raw}%`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    min: 0,
-                    max: 100,
-                    ticks: {
-                        callback: (value) => `${value}%`
-                    }
-                }
-            }
-        }
-    });
-}
 
-// 根据电量改变颜色
-        if (currentBatteryLevel > 60) {
-            batteryFill.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
-        } else if (currentBatteryLevel > 30) {
-            batteryFill.style.background = 'linear-gradient(90deg, #FF9800, #FFC107)';
-        } else {
-            batteryFill.style.background = 'linear-gradient(90deg, #FF6B6B, #FF8E53)';
-        }
-    }, 5000);
     
-    // CSV上传功能
-    const csvUpload = document.getElementById('csvUpload');
-    csvUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            playSound('success');
-            showNotification('电量数据上传成功！');
-            
-            // 模拟处理CSV数据
-            setTimeout(() => {
-                showNotification('数据分析完成！');
-            }, 2000);
-        }
-    });
-}
+
+
 
 // 今日舍规数据池
 const dormRulesPool = [
@@ -593,67 +470,7 @@ function initializeCountdown() {
     });
 }
 
-// 身份生成器功能
-function initializeCharacterGenerator() {
-    const generateBtn = document.getElementById('generateBtn');
-    const personalitySelect = document.getElementById('personalityType');
-    
-    const characterData = {
-        chunibyo: {
-            skills: ['暗黑魔法', '中二病发作', '幻想力MAX'],
-            weaknesses: ['现实打击', '社死现场', '中二病晚期'],
-            specials: ['暗黑能量波', '幻想具现化', '中二病传染']
-        },
-        cyber: {
-            skills: ['黑客技术', '机械改造', '电子入侵'],
-            weaknesses: ['EMP攻击', '网络断线', '系统崩溃'],
-            specials: ['量子计算', '赛博朋克', '数字永生']
-        },
-        tsundere: {
-            skills: ['傲娇技能', '口是心非', '脸红攻击'],
-            weaknesses: ['直球攻击', '温柔陷阱', '傲娇暴露'],
-            specials: ['傲娇光环', '脸红特效', '口是心非MAX']
-        },
-        yandere: {
-            skills: ['病娇技能', '占有欲MAX', '黑化能力'],
-            weaknesses: ['背叛打击', '失去目标', '病娇暴露'],
-            specials: ['病娇光环', '黑化模式', '占有欲爆发']
-        }
-    };
-    
-    generateBtn.addEventListener('click', function() {
-        playSound('success');
-        addShakeEffect(this);
-        
-        const personality = personalitySelect.value;
-        const data = characterData[personality];
-        
-        // 随机选择属性
-        const skill = data.skills[Math.floor(Math.random() * data.skills.length)];
-        const weakness = data.weaknesses[Math.floor(Math.random() * data.weaknesses.length)];
-        const special = data.specials[Math.floor(Math.random() * data.specials.length)];
-        
-        // 更新显示
-        document.getElementById('skillValue').textContent = skill;
-        document.getElementById('weaknessValue').textContent = weakness;
-        document.getElementById('specialValue').textContent = special;
-        
-        // 更新标题
-        const characterTitle = document.querySelector('.character-title');
-        characterTitle.textContent = `${personality === 'chunibyo' ? '中二病' : 
-                                   personality === 'cyber' ? '赛博朋克' : 
-                                   personality === 'tsundere' ? '傲娇' : '病娇'}系角色`;
-        
-        // 添加生成动画
-        const characterCard = document.getElementById('characterCard');
-        characterCard.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            characterCard.style.transform = 'scale(1)';
-        }, 300);
-        
-        showNotification('角色生成成功！');
-    });
-}
+
 
 // 弹窗系统
 function showModal(content) {
@@ -743,15 +560,7 @@ function startPetDrift(pet) {
         pet.style.transform = `translate(${randomX}px, ${randomY}px)`;
     }, 3000);
 }
-function startPlantDrift(plant) {
-    if (plant.driftTimer) clearInterval(plant.driftTimer);
-    plant.driftTimer = setInterval(() => {
-        if (plant.classList.contains('dragging')) return;
-        const randomX = Math.random() * 10 - 5;
-        const randomY = Math.random() * 10 - 5;
-        plant.style.transform = `translate(${randomX}px, ${randomY}px)`;
-    }, 3500);
-}
+
 // 修改initializePets，初始化时调用漂移动画
 function initializePets() {
     const pets = document.querySelectorAll('.pet');
@@ -816,8 +625,6 @@ function initializePets() {
                 </div>
             `);
         });
-        // 初始化漂移动画
-        startPlantDrift(plant);
         plant.addEventListener('mouseenter', function() {
             const eyes = plant.querySelector('.eyes');
             if (eyes) eyes.style.animationDuration = '1.2s';
@@ -831,19 +638,23 @@ function initializePets() {
 
 // 拖拽功能实现
 function enablePetDragDrop() {
-    const draggables = document.querySelectorAll('.pet, .plant');
+    const draggables = document.querySelectorAll('.pet');
     draggables.forEach(el => {
         el.style.cursor = 'grab';
         el.onmousedown = dragStart;
         el.ontouchstart = dragStart;
     });
-    let draggingEl = null, offsetX = 0, offsetY = 0, startRect = null;
+    
+    let draggingEl = null, offsetX = 0, offsetY = 0;
+    
     function dragStart(e) {
         e.preventDefault();
         draggingEl = this;
+        
         draggingEl.classList.add('dragging');
-        draggingEl.style.pointerEvents = 'none';
-        startRect = draggingEl.getBoundingClientRect();
+        draggingEl.style.cursor = 'grabbing';
+        
+        const startRect = draggingEl.getBoundingClientRect();
         if (e.type === 'touchstart') {
             offsetX = e.touches[0].clientX - startRect.left;
             offsetY = e.touches[0].clientY - startRect.top;
@@ -855,12 +666,16 @@ function enablePetDragDrop() {
             document.onmousemove = dragMove;
             document.onmouseup = dragEnd;
         }
+        
+        // 保存原始样式
         draggingEl.style.position = 'fixed';
         draggingEl.style.left = startRect.left + 'px';
         draggingEl.style.top = startRect.top + 'px';
         draggingEl.style.zIndex = 9999;
     }
+    
     function dragMove(e) {
+        if (!draggingEl) return;
         let x, y;
         if (e.type === 'touchmove') {
             x = e.touches[0].clientX - offsetX;
@@ -872,24 +687,25 @@ function enablePetDragDrop() {
         draggingEl.style.left = x + 'px';
         draggingEl.style.top = y + 'px';
     }
+    
     function dragEnd(e) {
+        if (!draggingEl) return;
+        
+        // 恢复原始状态
         draggingEl.classList.remove('dragging');
-        draggingEl.style.pointerEvents = '';
-        // 计算相对pet-room的位置
-        const petRoom = document.querySelector('.pet-room');
-        const roomRect = petRoom.getBoundingClientRect();
-        let x = parseInt(draggingEl.style.left) - roomRect.left;
-        let y = parseInt(draggingEl.style.top) - roomRect.top;
-        draggingEl.style.position = 'absolute';
-        draggingEl.style.left = x + 'px';
-        draggingEl.style.top = y + 'px';
-        petRoom.appendChild(draggingEl);
+        draggingEl.style.cursor = 'grab';
+        draggingEl.style.position = '';
+        draggingEl.style.left = '';
+        draggingEl.style.top = '';
         draggingEl.style.zIndex = '';
-        draggingEl = null;
+        
+        // 清理事件监听器
         document.onmousemove = null;
         document.onmouseup = null;
         document.ontouchmove = null;
         document.ontouchend = null;
+        
+        draggingEl = null;
     }
 }
 
@@ -897,12 +713,23 @@ function enablePetDragDrop() {
 function animateFishTank() {
     const tank = document.querySelector('.fish-tank');
     if (!tank) return;
+    
     const fishes = [
         { el: document.getElementById('fish1'), dir: 1, y: 60, speed: 1.2, flip: false, lastX: 0 },
         { el: document.getElementById('fish2'), dir: -1, y: 120, speed: 0.9, flip: true, lastX: 0 }
     ];
+    
+    // 检查小鱼元素是否存在
+    fishes.forEach((fish, i) => {
+        if (!fish.el) {
+            console.log(`小鱼${i+1}元素未找到`);
+            return;
+        }
+    });
+    
     const tankW = 320, tankH = 200, fishW = 48, fishH = 28, margin = 10;
     let t = 0;
+    
     // 初始位置
     fishes.forEach((fish, i) => {
         if (fish.el) {
@@ -912,6 +739,7 @@ function animateFishTank() {
             fish.lastX = margin + (i * 60);
         }
     });
+    
     function moveFish() {
         t += 0.03;
         fishes.forEach((fish, i) => {
@@ -929,117 +757,14 @@ function animateFishTank() {
         });
         requestAnimationFrame(moveFish);
     }
-    moveFish();
+    
+    // 延迟启动动画，确保DOM完全加载
+    setTimeout(() => {
+        moveFish();
+    }, 100);
 }
 
-function fetchElectricityDataAndDrawChart() {
-    const infoDiv = document.getElementById('electricity-info');
-    const chartCanvas = document.getElementById('electricity-chart');
-    if (!infoDiv || !chartCanvas) return;
-    infoDiv.textContent = '正在获取电量数据...';
-    fetch('https://karyll-star.github.io/ecust-electricity-statistics/data.js')
-        .then(res => res.text())
-        .then(js => {
-            // 兼容 data=[{time:...,kWh:...}] 格式
-            let arrMatch = js.match(/data\s*=\s*(\[.*?\]);/s);
-            if (!arrMatch) {
-                infoDiv.textContent = '未能解析电量数据';
-                return;
-            }
-            let dataArr = [];
-            try {
-                dataArr = JSON.parse(arrMatch[1]);
-            } catch {
-                infoDiv.textContent = '电量数据格式错误';
-                return;
-            }
-            if (!Array.isArray(dataArr) || dataArr.length === 0) {
-                infoDiv.textContent = '暂无电量数据';
-                return;
-            }
-            // 适配 {time, kWh} 格式
-            let dates = [], values = [];
-            dataArr.forEach(item => {
-                if (item.time && item.kWh !== undefined) {
-                    dates.push(item.time);
-                    values.push(Number(item.kWh));
-                }
-            });
-            if (dates.length === 0) {
-                infoDiv.textContent = '电量数据为空';
-                return;
-            }
-            // 展示最新电量
-            infoDiv.innerHTML = `<span>寝室当前剩余电量：<b style='color:#27ae60;'>${values[values.length-1]}</b> 度</span>`;
-            // 绘制折线图
-            drawElectricityChart(chartCanvas, dates, values);
-        })
-        .catch(() => {
-            infoDiv.textContent = '无法获取电量数据（网络或CORS问题）';
-        });
-}
 
-function drawElectricityChart(canvas, labels, data) {
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // 适配高DPI
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = 600 * dpr;
-    canvas.height = 300 * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // 坐标轴
-    const w = 600, h = 300, pad = 40;
-    ctx.strokeStyle = '#b5ead7';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(pad, pad);
-    ctx.lineTo(pad, h-pad);
-    ctx.lineTo(w-pad, h-pad);
-    ctx.stroke();
-    // 计算数据范围
-    const minV = Math.min(...data), maxV = Math.max(...data);
-    const range = maxV - minV || 1;
-    // 绘制折线
-    ctx.strokeStyle = '#27ae60';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    data.forEach((v, i) => {
-        const x = pad + (w-2*pad) * (i/(data.length-1));
-        const y = h-pad - (h-2*pad) * ((v-minV)/range);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    // 绘制点
-    ctx.fillStyle = '#ffd1dc';
-    data.forEach((v, i) => {
-        const x = pad + (w-2*pad) * (i/(data.length-1));
-        const y = h-pad - (h-2*pad) * ((v-minV)/range);
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, 2*Math.PI);
-        ctx.fill();
-    });
-    // 绘制最新点高亮
-    ctx.fillStyle = '#d63031';
-    const lastX = pad + (w-2*pad) * ((data.length-1)/(data.length-1));
-    const lastY = h-pad - (h-2*pad) * ((data[data.length-1]-minV)/range);
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 6, 0, 2*Math.PI);
-    ctx.fill();
-    // 绘制标签
-    ctx.fillStyle = '#333';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'center';
-    for (let i=0; i<labels.length; i+=Math.ceil(labels.length/7)) {
-        const x = pad + (w-2*pad) * (i/(labels.length-1));
-        ctx.fillText(labels[i], x, h-pad+20);
-    }
-    // Y轴刻度
-    ctx.textAlign = 'right';
-    ctx.fillText(maxV.toFixed(1), pad-5, pad+5);
-    ctx.fillText(minV.toFixed(1), pad-5, h-pad+5);
-}
 
 // 关闭弹窗事件
 document.addEventListener('DOMContentLoaded', function() {
@@ -1061,14 +786,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRoommateCards();
     loadSavedImages(); // 加载保存的图片
     initializePets();
-    initializeBatteryMonitor();
+
     initializeRules();
     initializeCountdown();
-    initializeCharacterGenerator();
+
     initializeNavigation();
     enablePetDragDrop(); // 启用宠物和植物的拖拽功能
     animateFishTank(); // 启动鱼缸动画
-    fetchElectricityDataAndDrawChart(); // 只用data.js数据
+
     
     // 添加页面加载动画
     document.body.style.opacity = '0';

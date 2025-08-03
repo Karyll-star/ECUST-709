@@ -26,10 +26,10 @@
             <div class="nav-menu">
                 <a href="#roommates" class="nav-link">舍友一览</a>
                 <a href="#pets" class="nav-link">宠物窝</a>
-                <a href="#battery" class="nav-link">电量监控</a>
+
                 <a href="#rules" class="nav-link">今日舍规</a>
                 <a href="#countdown" class="nav-link">节日倒计时</a>
-                <a href="#generator" class="nav-link">身份生成器</a>
+
             </div>
         </div>
     </nav>
@@ -46,13 +46,13 @@
             <div class="roommates-grid">
                 <div class="roommate-card" data-roommate="社恐">
                     <div class="card-photo">
-                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=社恐" alt="乌蒙舍友" class="roommate-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=" alt="乌蒙舍友" class="roommate-image">
                         <div class="date-watermark">2024.01.15</div>
                         <div class="star-effect"></div>
                         <div class="image-edit-overlay">
-                            <input type="file" id="image-upload-社恐" class="image-upload" accept="image/*" data-roommate="社恐">
-                            <label for="image-upload-社恐" class="edit-btn">
-                                <i class="fas fa-camera"></i>
+                            <input type="text" id="image-link-社恐" class="image-link" placeholder="输入图片链接" data-roommate="社恐">
+                            <label for="image-link-社恐" class="edit-btn">
+                                <i class="fas fa-link"></i>
                             </label>
                             <button class="reset-btn" onclick="resetRoommateImage('社恐')" title="重置为默认图片">
                                 <i class="fas fa-undo"></i>
@@ -74,14 +74,14 @@
 
                 <div class="roommate-card" data-roommate="摸鱼">
                     <div class="card-photo">
-                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=摸鱼" alt="摸鱼舍友" class="roommate-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=" alt="摸鱼舍友" class="roommate-image">
                         <div class="date-watermark">2024.01.15</div>
                         <div class="star-effect"></div>
                         <div class="zzz-effect">zzz</div>
                         <div class="image-edit-overlay">
-                            <input type="file" id="image-upload-摸鱼" class="image-upload" accept="image/*" data-roommate="摸鱼">
-                            <label for="image-upload-摸鱼" class="edit-btn">
-                                <i class="fas fa-camera"></i>
+                            <input type="text" id="image-link-摸鱼" class="image-link" placeholder="输入图片链接" data-roommate="摸鱼">
+                            <label for="image-link-摸鱼" class="edit-btn">
+                                <i class="fas fa-link"></i>
                             </label>
                             <button class="reset-btn" onclick="resetRoommateImage('摸鱼')" title="重置为默认图片">
                                 <i class="fas fa-undo"></i>
@@ -103,13 +103,13 @@
 
                 <div class="roommate-card" data-roommate="学霸">
                     <div class="card-photo">
-                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=学霸" alt="修仙舍友" class="roommate-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=" alt="修仙舍友" class="roommate-image">
                         <div class="date-watermark">2024.01.15</div>
                         <div class="star-effect"></div>
                         <div class="image-edit-overlay">
-                            <input type="file" id="image-upload-学霸" class="image-upload" accept="image/*" data-roommate="学霸">
-                            <label for="image-upload-学霸" class="edit-btn">
-                                <i class="fas fa-camera"></i>
+                            <input type="text" id="image-link-学霸" class="image-link" placeholder="输入图片链接" data-roommate="学霸">
+                            <label for="image-link-学霸" class="edit-btn">
+                                <i class="fas fa-link"></i>
                             </label>
                             <button class="reset-btn" onclick="resetRoommateImage('学霸')" title="重置为默认图片">
                                 <i class="fas fa-undo"></i>
@@ -131,13 +131,13 @@
 
                 <div class="roommate-card" data-roommate="夜猫">
                     <div class="card-photo">
-                        <img src="https://via.placeholder.com/150x200/FFD1DC/FFFFFF?text=夜猫" alt="钓鱼舍友" class="roommate-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=" alt="钓鱼舍友" class="roommate-image">
                         <div class="date-watermark">2024.01.15</div>
                         <div class="star-effect"></div>
                         <div class="image-edit-overlay">
-                            <input type="file" id="image-upload-夜猫" class="image-upload" accept="image/*" data-roommate="夜猫">
-                            <label for="image-upload-夜猫" class="edit-btn">
-                                <i class="fas fa-camera"></i>
+                            <input type="text" id="image-link-夜猫" class="image-link" placeholder="输入图片链接" data-roommate="夜猫">
+                            <label for="image-link-夜猫" class="edit-btn">
+                                <i class="fas fa-link"></i>
                             </label>
                             <button class="reset-btn" onclick="resetRoommateImage('夜猫')" title="重置为默认图片">
                                 <i class="fas fa-undo"></i>
@@ -218,37 +218,7 @@
             </div>
         </section>
 
-        <!-- 电量监控模块 -->
-        <section id="battery" class="section">
-            <h2 class="section-title">
-                <span class="title-text">电量监控</span>
-                <span class="sound-effect">エネルギー</span>
-            </h2>
-            <div class="battery-monitor">
-                <div class="magic-circle">
-                    <div class="crystal-battery">
-                        <div class="battery-level" id="batteryLevel">
-                            <div class="battery-fill"></div>
-                            <span class="battery-text">85%</span>
-                        </div>
-                    </div>
-                    <div class="spell-text">エネルギー</div>
-                </div>
-                <div id="electricity-info" style="margin: 20px 0 0 0; text-align: center; font-size: 1.2rem; color: #333;"></div>
-                <canvas id="electricity-chart" style="width:100%;max-width:600px;height:300px;margin:20px auto;display:block;"></canvas>
-                <div class="battery-controls">
-                    <input type="file" id="csvUpload" accept=".csv" class="csv-upload">
-                    <label for="csvUpload" class="upload-btn">上传电量数据</label>
-                    <div class="battery-history">
-                        <h3>电量历史</h3>
-                        <div class="history-item">
-                            <span class="time">7月停电事件</span>
-                            <span class="description">举手机照明四人画面</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+
 
         <!-- 今日舍规模块 -->
         <section id="rules" class="section">
@@ -259,7 +229,7 @@
             <div class="rules-container">
                 <div class="ai-dorm-leader">
                     <div class="leader-avatar">
-                        <img src="https://via.placeholder.com/80x80/FFD1DC/FFFFFF?text=AI" alt="AI舍长">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0ZGRDFEQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5BSSDvvaTlsIHku6M8L3RleHQ+PC9zdmc+" alt="AI舍长">
                     </div>
                     <div class="leader-dialog">
                         <div class="dialog-content">
@@ -281,7 +251,7 @@
             <div class="countdown-container">
                 <div class="countdown-item">
                     <div class="countdown-icon">
-                        <img src="https://via.placeholder.com/60x60/FFD1DC/FFFFFF?text=初音" alt="初音未来日">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0ZGRDFEQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7mnKzlm748L3RleHQ+PC9zdmc+" alt="初音未来日">
                     </div>
                     <div class="countdown-info">
                         <h3>初音未来日</h3>
@@ -294,7 +264,7 @@
                 </div>
                 <div class="countdown-item">
                     <div class="countdown-icon">
-                        <img src="https://via.placeholder.com/60x60/FFD1DC/FFFFFF?text=内裤" alt="寝室内裤日">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI0ZGRDFEQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7vvaTlsIHku6M8L3RleHQ+PC9zdmc+" alt="寝室内裤日">
                     </div>
                     <div class="countdown-info">
                         <h3>寝室内裤日</h3>
@@ -308,45 +278,7 @@
             </div>
         </section>
 
-        <!-- 寝室身份生成器模块 -->
-        <section id="generator" class="section">
-            <h2 class="section-title">
-                <span class="title-text">キャラクター生成</span>
-                <span class="sound-effect">ワクワク！</span>
-            </h2>
-            <div class="generator-container">
-                <div class="generator-controls">
-                    <select id="personalityType" class="personality-select">
-                        <option value="chunibyo">中二系</option>
-                        <option value="cyber">赛博系</option>
-                        <option value="tsundere">傲娇系</option>
-                        <option value="yandere">病娇系</option>
-                    </select>
-                    <button id="generateBtn" class="generate-btn">生成身份</button>
-                </div>
-                <div class="character-card" id="characterCard">
-                    <div class="card-header">
-                        <div class="character-title">点击生成你的身份</div>
-                    </div>
-                    <div class="card-content">
-                        <div class="character-attributes">
-                            <div class="attribute">
-                                <span class="attr-label">技能:</span>
-                                <span class="attr-value" id="skillValue">-</span>
-                            </div>
-                            <div class="attribute">
-                                <span class="attr-label">弱点:</span>
-                                <span class="attr-value" id="weaknessValue">-</span>
-                            </div>
-                            <div class="attribute">
-                                <span class="attr-label">特殊能力:</span>
-                                <span class="attr-value" id="specialValue">-</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+
     </main>
 
     <!-- 弹窗组件 -->
@@ -358,7 +290,6 @@
     </div>
 
     <!-- 音效和动画脚本 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 
