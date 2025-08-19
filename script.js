@@ -33,16 +33,12 @@ function playSound(soundName) {
 
 function addShakeEffect(element) {
     element.classList.add('shake');
-    setTimeout(() => {
-        element.classList.remove('shake');
-    }, 500);
+    setTimeout(() => element.classList.remove('shake'), 500);
 }
 
 function addFlashEffect(element) {
     element.classList.add('flash');
-    setTimeout(() => {
-        element.classList.remove('flash');
-    }, 300);
+    setTimeout(() => element.classList.remove('flash'), 300);
 }
 
 // 舍友卡片功能
@@ -51,15 +47,9 @@ function initializeRoommateCards() {
     
     cards.forEach(card => {
         card.addEventListener('click', function(e) {
-            // 如果点击的是编辑按钮，不显示弹窗
-            if (e.target.closest('.edit-btn') || e.target.closest('.image-link')) {
-                return;
-            }
-            
             playSound('click');
             addShakeEffect(this);
             
-            // 显示详细信息弹窗
             const roommateType = this.dataset.roommate;
             const roommateName = this.querySelector('h3').textContent;
             const status = this.querySelector('.status').textContent;
@@ -92,232 +82,35 @@ function initializeRoommateCards() {
             `);
         });
     });
-    
-    // 初始化图片链接功能
-    initializeImageLink();
-}
-
-// 图片链接功能
-function initializeImageLink() {
-    const imageLinks = document.querySelectorAll('.image-link');
-    
-    imageLinks.forEach(link => {
-        link.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const imageUrl = this.value.trim();
-                if (imageUrl) {
-                    // 验证URL格式
-                    if (!isValidImageUrl(imageUrl)) {
-                        showNotification('请输入有效的图片链接！');
-                        return;
-                    }
-                    
-                    const roommateType = link.dataset.roommate;
-                    const roommateCard = link.closest('.roommate-card');
-                    const image = roommateCard.querySelector('.roommate-image');
-                    
-                    // 显示图片预览弹窗
-                    showImagePreview(imageUrl, roommateType, image, roommateCard);
-                    
-                    // 清空输入框
-                    this.value = '';
-                }
-            }
-        });
-        
-        // 点击编辑按钮时聚焦到输入框
-        const editBtn = link.nextElementSibling;
-        if (editBtn) {
-            editBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                link.style.display = 'block';
-                link.focus();
-            });
-        }
-    });
-}
-
-// 验证图片URL
-function isValidImageUrl(url) {
-    try {
-        const urlObj = new URL(url);
-        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
-    } catch {
-        return false;
-    }
-}
-
-// 保存图片到本地存储
-function saveImageToLocalStorage(roommateType, imageData) {
-    try {
-        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
-        savedImages[roommateType] = imageData;
-        localStorage.setItem('roommateImages', JSON.stringify(savedImages));
-    } catch (error) {
-        console.log('保存图片失败:', error);
-    }
-}
-
-// 加载保存的图片
-function loadSavedImages() {
-    try {
-        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
-        
-        Object.keys(savedImages).forEach(roommateType => {
-            const roommateCard = document.querySelector(`[data-roommate="${roommateType}"]`);
-            if (roommateCard) {
-                const image = roommateCard.querySelector('.roommate-image');
-                image.src = savedImages[roommateType];
-            }
-        });
-    } catch (error) {
-        console.log('加载保存的图片失败:', error);
-    }
-}
-
-// 图片预览功能
-function showImagePreview(imageUrl, roommateType, imageElement, roommateCard) {
-    const previewContent = `
-        <h2>图片预览</h2>
-        <div class="image-preview-container">
-            <div class="preview-image-wrapper">
-                <img src="${imageUrl}" alt="预览图片" class="preview-image" onerror="this.style.display='none'; document.getElementById('preview-error').style.display='block';">
-                <div id="preview-error" style="display:none; color:red; text-align:center; padding:20px;">
-                    图片加载失败，请检查链接是否正确
-                </div>
-            </div>
-            <div class="preview-info">
-                <p><strong>舍友类型:</strong> ${roommateType}</p>
-                <p><strong>图片链接:</strong> <span style="word-break:break-all;">${imageUrl}</span></p>
-                <p><strong>图片尺寸:</strong> <span id="image-size">计算中...</span></p>
-            </div>
-            <div class="preview-actions">
-                <button class="preview-btn confirm-btn" onclick="confirmImageUpdate('${imageUrl}', '${roommateType}', '${imageElement.id}', '${roommateCard.dataset.roommate}')">
-                    <i class="fas fa-check"></i> 确认使用
-                </button>
-                <button class="preview-btn cancel-btn" onclick="closeModal()">
-                    <i class="fas fa-times"></i> 取消
-                </button>
-            </div>
-        </div>
-    `;
-    
-    showModal(previewContent);
-    
-    // 计算图片信息
-    const img = new Image();
-    img.onload = function() {
-        document.getElementById('image-size').textContent = `${this.width} × ${this.height}`;
-    };
-    img.onerror = function() {
-        document.getElementById('image-size').textContent = '无法获取';
-    };
-    img.src = imageUrl;
-}
-
-// 确认图片更新
-function confirmImageUpdate(imageUrl, roommateType, imageElementId, roommateTypeData) {
-    const imageElement = document.querySelector(`[data-roommate="${roommateTypeData}"] .roommate-image`);
-    const roommateCard = document.querySelector(`[data-roommate="${roommateTypeData}"]`);
-    
-    // 更新图片
-    imageElement.src = imageUrl;
-    
-    // 添加成功动画
-    imageElement.classList.add('image-link-success');
-    setTimeout(() => {
-        imageElement.classList.remove('image-link-success');
-    }, 500);
-    
-    // 播放成功音效
-    playSound('success');
-    
-    // 显示成功通知
-    showNotification(`${roommateType}的图片更新成功！`);
-    
-    // 更新日期水印
-    const dateWatermark = roommateCard.querySelector('.date-watermark');
-    const today = new Date();
-    const dateString = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
-    dateWatermark.textContent = dateString;
-    
-    // 保存到本地存储
-    saveImageToLocalStorage(roommateType, imageUrl);
-    
-    // 关闭弹窗
-    closeModal();
-}
-
-// 重置舍友图片
-function resetRoommateImage(roommateType) {
-    const roommateCard = document.querySelector(`[data-roommate="${roommateType}"]`);
-    const image = roommateCard.querySelector('.roommate-image');
-    
-    // 默认图片URL
-    const defaultImages = {
-        '社恐': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
-        '摸鱼': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
-        '学霸': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4=',
-        '夜猫': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRkZEMURDIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWkqei0pTwvdGV4dD48L3N2Zz4='
-    };
-    
-    // 更新图片
-    image.src = defaultImages[roommateType];
-    
-    // 添加重置动画
-    image.classList.add('image-link-success');
-    setTimeout(() => {
-        image.classList.remove('image-link-success');
-    }, 500);
-    
-    // 播放音效
-    playSound('success');
-    
-    // 显示通知
-    showNotification(`${roommateType}的图片已重置为默认！`);
-    
-    // 更新日期水印
-    const dateWatermark = roommateCard.querySelector('.date-watermark');
-    const today = new Date();
-    const dateString = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
-    dateWatermark.textContent = dateString;
-    
-    // 从本地存储中删除
-    try {
-        const savedImages = JSON.parse(localStorage.getItem('roommateImages') || '{}');
-        delete savedImages[roommateType];
-        localStorage.setItem('roommateImages', JSON.stringify(savedImages));
-    } catch (error) {
-        console.log('删除保存的图片失败:', error);
-    }
 }
 
 // 宠物功能
 function initializePets() {
-    // 处理鱼缸和原有宠物
-    const pets = document.querySelectorAll('.pet');
+    // 选择所有宠物和植物元素
+    const pets = document.querySelectorAll('.pet, .swim-fish, .plant');
     pets.forEach(pet => {
         pet.addEventListener('click', function() {
-            const petType = this.dataset.pet;
-            const quote = this.querySelector('.pet-quote')?.textContent || '';
+            const petType = this.dataset.pet || this.dataset.plant || this.id;
+            const quote = this.querySelector('.pet-quote, .plant-quote')?.textContent || '';
             const realImg = this.dataset.real;
-            // 如果是鱼缸，弹窗显示真实图片
+            
             if (petType === 'fish1' || petType === 'fish2') {
                 showModal(`
                     <h2>鱼缸${petType === 'fish1' ? '1号' : '2号'} - 真实照片</h2>
                     <div style="text-align:center;">
-                        <img src="${realImg}" alt="鱼缸真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
-                        <div style="font-size:1.1rem;color:#4ECDC4;">${quote}</div>
+                        <img src="${realImg || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'}" alt="鱼缸真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
+                        <div style="font-size:1.1rem;color:#4ECDC4;">${quote || '游来游去的小鱼'}</div>
                     </div>
                 `);
                 return;
             }
-            // 原有猫狗逻辑
+            
             if (petType === 'cat') {
                 playSound('meow');
             } else if (petType === 'dog') {
                 playSound('bark');
             }
+            
             addShakeEffect(this);
             showModal(`
                 <h2>宠物互动</h2>
@@ -333,44 +126,27 @@ function initializePets() {
                 </div>
             `);
         });
-        // 初始化漂移动画
-        startPetDrift(pet);
-        // 鼠标悬停时加快眨眼动画
-        pet.addEventListener('mouseenter', function() {
-            const eyes = pet.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '1.2s';
-        });
-        pet.addEventListener('mouseleave', function() {
-            const eyes = pet.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '';
-        });
-    });
-    // 处理草盆
-    const plants = document.querySelectorAll('.plant');
-    plants.forEach(plant => {
-        plant.addEventListener('click', function() {
-            const plantType = this.dataset.plant;
-            const realImg = this.dataset.real;
-            const quote = this.querySelector('.plant-quote')?.textContent || '';
-            showModal(`
-                <h2>草盆${plantType === 'grass1' ? '1号' : '2号'} - 真实照片</h2>
-                <div style="text-align:center;">
-                    <img src="${realImg}" alt="草盆真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
-                    <div style="font-size:1.1rem;color:#27ae60;">${quote}</div>
-                </div>
-            `);
-        });
-        plant.addEventListener('mouseenter', function() {
-            const eyes = plant.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '1.2s';
-        });
-        plant.addEventListener('mouseleave', function() {
-            const eyes = plant.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '';
-        });
+        
+        // 只为非鱼类的元素添加漂移动画
+        if (!pet.classList.contains('swim-fish')) {
+            startPetDrift(pet);
+        }
+        
+        // 为有眼睛的元素添加鼠标悬停效果
+        const eyes = pet.querySelector('.eyes');
+        if (eyes) {
+            pet.addEventListener('mouseenter', function() {
+                eyes.style.animationDuration = '1.2s';
+            });
+            
+            pet.addEventListener('mouseleave', function() {
+                eyes.style.animationDuration = '';
+            });
+        }
     });
 }
 
+// 宠物互动功能
 function feedPet(petType) {
     playSound('success');
     showNotification(`${petType === 'cat' ? '猫咪' : '狗狗'}吃饱了！`);
@@ -386,13 +162,6 @@ function petPet(petType) {
     showNotification(`${petType === 'cat' ? '猫咪' : '狗狗'}被摸得很舒服！`);
 }
 
-
-
-
-    
-
-
-
 // 今日舍规数据池
 const dormRulesPool = [
     { type: 'forbidden', icon: 'ban', text: '今天必须将袜子穿在手上' },
@@ -402,18 +171,18 @@ const dormRulesPool = [
     { type: 'forbidden', icon: 'ban', text: '禁止使用正常语气说话，必须角色扮演' },
     { type: 'suggestion', icon: 'lightbulb', text: '建议以Saber为榜样完成学习任务' },
     { type: 'forbidden', icon: 'ban', text: '禁止不对猫猫（或幻想中的猫猫）打招呼' },
-    { type: 'suggestion', icon: 'lightbulb', text: '建议将宿舍命名为“次元裂缝研究所”' },
+    { type: 'suggestion', icon: 'lightbulb', text: '建议将宿舍命名为"次元裂缝研究所"' },
     { type: 'forbidden', icon: 'ban', text: '禁止忘记赞美初音未来' },
-    { type: 'suggestion', icon: 'lightbulb', text: '建议对镜自拍并加二次元滤镜后群发' },
-    // ……其余90条规则省略显示，可通过脚本或数据库加载
+    { type: 'suggestion', icon: 'lightbulb', text: '建议对镜自拍并加二次元滤镜后群发' }
 ];
+
 function getRandomRuleOfDay() {
-    // 用日期做种子，保证每天只变一次
     const today = new Date();
     const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-    let idx = seed % dormRulesPool.length;
+    const idx = seed % dormRulesPool.length;
     return dormRulesPool[idx];
 }
+
 function renderRuleOfDay() {
     const rule = getRandomRuleOfDay();
     const rulesList = document.querySelector('.rules-list');
@@ -426,10 +195,10 @@ function renderRuleOfDay() {
         `;
     }
 }
+
 function initializeRules() {
     renderRuleOfDay();
 }
-
 
 // 节日倒计时功能
 function initializeCountdown() {
@@ -457,20 +226,13 @@ function initializeCountdown() {
             element.querySelector('.hours').textContent = hours.toString().padStart(2, '0');
             element.querySelector('.minutes').textContent = minutes.toString().padStart(2, '0');
             
-            // 特殊效果
-            if (days <= 3) {
-                element.classList.add('urgent');
-            }
-            if (days <= 1) {
-                element.classList.add('final-day');
-            }
+            if (days <= 3) element.classList.add('urgent');
+            if (days <= 1) element.classList.add('final-day');
         }, 1000);
         
         countdownTimers[element.dataset.date] = timerId;
     });
 }
-
-
 
 // 弹窗系统
 function showModal(content) {
@@ -479,20 +241,15 @@ function showModal(content) {
     
     modalBody.innerHTML = content;
     modal.style.display = 'block';
-    
-    // 添加弹窗动画
     modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
+    
+    setTimeout(() => modal.style.opacity = '1', 10);
 }
 
 function closeModal() {
     const modal = document.getElementById('modal');
     modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
+    setTimeout(() => modal.style.display = 'none', 300);
 }
 
 // 通知系统
@@ -500,31 +257,13 @@ function showNotification(message) {
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--bright-yellow);
-        color: #333;
-        padding: 15px 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px var(--shadow-color);
-        z-index: 3000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
     
     document.body.appendChild(notification);
     
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
     setTimeout(() => {
         notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
+        setTimeout(() => document.body.removeChild(notification), 300);
     }, 3000);
 }
 
@@ -550,7 +289,7 @@ function initializeNavigation() {
     });
 }
 
-// 新增：漂移动画函数，拖拽时暂停，松手后恢复
+// 漂移动画函数
 function startPetDrift(pet) {
     if (pet.driftTimer) clearInterval(pet.driftTimer);
     pet.driftTimer = setInterval(() => {
@@ -561,84 +300,10 @@ function startPetDrift(pet) {
     }, 3000);
 }
 
-// 修改initializePets，初始化时调用漂移动画
-function initializePets() {
-    const pets = document.querySelectorAll('.pet');
-    pets.forEach(pet => {
-        pet.addEventListener('click', function() {
-            const petType = this.dataset.pet;
-            const quote = this.querySelector('.pet-quote')?.textContent || '';
-            const realImg = this.dataset.real;
-            if (petType === 'fish1' || petType === 'fish2') {
-                showModal(`
-                    <h2>鱼缸${petType === 'fish1' ? '1号' : '2号'} - 真实照片</h2>
-                    <div style="text-align:center;">
-                        <img src="${realImg}" alt="鱼缸真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
-                        <div style="font-size:1.1rem;color:#4ECDC4;">${quote}</div>
-                    </div>
-                `);
-                return;
-            }
-            if (petType === 'cat') {
-                playSound('meow');
-            } else if (petType === 'dog') {
-                playSound('bark');
-            }
-            addShakeEffect(this);
-            showModal(`
-                <h2>宠物互动</h2>
-                <div class="pet-interaction">
-                    <p><strong>宠物类型:</strong> ${petType === 'cat' ? '猫咪' : '狗狗'}</p>
-                    <p><strong>当前状态:</strong> 正在卖萌</p>
-                    <p><strong>说的话:</strong> ${quote}</p>
-                    <div class="pet-actions">
-                        <button onclick="feedPet('${petType}')">喂食</button>
-                        <button onclick="playWithPet('${petType}')">玩耍</button>
-                        <button onclick="petPet('${petType}')">抚摸</button>
-                    </div>
-                </div>
-            `);
-        });
-        // 初始化漂移动画
-        startPetDrift(pet);
-        // 鼠标悬停时加快眨眼动画
-        pet.addEventListener('mouseenter', function() {
-            const eyes = pet.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '1.2s';
-        });
-        pet.addEventListener('mouseleave', function() {
-            const eyes = pet.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '';
-        });
-    });
-    const plants = document.querySelectorAll('.plant');
-    plants.forEach(plant => {
-        plant.addEventListener('click', function() {
-            const plantType = this.dataset.plant;
-            const realImg = this.dataset.real;
-            const quote = this.querySelector('.plant-quote')?.textContent || '';
-            showModal(`
-                <h2>草盆${plantType === 'grass1' ? '1号' : '2号'} - 真实照片</h2>
-                <div style="text-align:center;">
-                    <img src="${realImg}" alt="草盆真实图片" style="max-width:100%;border-radius:15px;box-shadow:0 4px 15px #B5EAD7;margin-bottom:15px;">
-                    <div style="font-size:1.1rem;color:#27ae60;">${quote}</div>
-                </div>
-            `);
-        });
-        plant.addEventListener('mouseenter', function() {
-            const eyes = plant.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '1.2s';
-        });
-        plant.addEventListener('mouseleave', function() {
-            const eyes = plant.querySelector('.eyes');
-            if (eyes) eyes.style.animationDuration = '';
-        });
-    });
-}
-
 // 拖拽功能实现
 function enablePetDragDrop() {
-    const draggables = document.querySelectorAll('.pet');
+    // 选择所有可拖拽的元素：宠物、鱼、植物
+    const draggables = document.querySelectorAll('.pet, .swim-fish, .plant');
     draggables.forEach(el => {
         el.style.cursor = 'grab';
         el.onmousedown = dragStart;
@@ -667,7 +332,6 @@ function enablePetDragDrop() {
             document.onmouseup = dragEnd;
         }
         
-        // 保存原始样式
         draggingEl.style.position = 'fixed';
         draggingEl.style.left = startRect.left + 'px';
         draggingEl.style.top = startRect.top + 'px';
@@ -691,7 +355,6 @@ function enablePetDragDrop() {
     function dragEnd(e) {
         if (!draggingEl) return;
         
-        // 恢复原始状态
         draggingEl.classList.remove('dragging');
         draggingEl.style.cursor = 'grab';
         draggingEl.style.position = '';
@@ -699,7 +362,6 @@ function enablePetDragDrop() {
         draggingEl.style.top = '';
         draggingEl.style.zIndex = '';
         
-        // 清理事件监听器
         document.onmousemove = null;
         document.onmouseup = null;
         document.ontouchmove = null;
@@ -712,7 +374,10 @@ function enablePetDragDrop() {
 // 鱼缸小鱼动态游动动画
 function animateFishTank() {
     const tank = document.querySelector('.fish-tank');
-    if (!tank) return;
+    if (!tank) {
+        console.log('鱼缸元素未找到');
+        return;
+    }
     
     const fishes = [
         { el: document.getElementById('fish1'), dir: 1, y: 60, speed: 1.2, flip: false, lastX: 0 },
@@ -725,18 +390,24 @@ function animateFishTank() {
             console.log(`小鱼${i+1}元素未找到`);
             return;
         }
+        console.log(`小鱼${i+1}元素找到:`, fish.el);
     });
     
     const tankW = 320, tankH = 200, fishW = 48, fishH = 28, margin = 10;
     let t = 0;
     
-    // 初始位置
+    // 设置小鱼的初始位置
     fishes.forEach((fish, i) => {
         if (fish.el) {
+            // 确保小鱼有正确的定位样式
+            fish.el.style.position = 'absolute';
             fish.el.style.left = (margin + (i * 60)) + 'px';
-            fish.el.style.top = (fish.y) + 'px';
+            fish.el.style.top = fish.y + 'px';
             fish.el.style.transform = 'scaleX(1)';
+            fish.el.style.zIndex = '20';
             fish.lastX = margin + (i * 60);
+            
+            console.log(`设置小鱼${i+1}初始位置:`, fish.el.style.left, fish.el.style.top);
         }
     });
     
@@ -744,11 +415,12 @@ function animateFishTank() {
         t += 0.03;
         fishes.forEach((fish, i) => {
             if (!fish.el) return;
+            
             let range = tankW - fishW - margin * 2;
             let x = Math.abs(Math.sin(t * fish.speed + i)) * range;
             if (fish.dir < 0) x = range - x;
             let y = fish.y + Math.sin(t * fish.speed + i * 1.5) * 10;
-            // 判断运动方向
+            
             let direction = (x > fish.lastX) ? 1 : -1;
             fish.el.style.left = (x + margin) + 'px';
             fish.el.style.top = y + 'px';
@@ -760,13 +432,31 @@ function animateFishTank() {
     
     // 延迟启动动画，确保DOM完全加载
     setTimeout(() => {
+        console.log('启动小鱼游动动画');
         moveFish();
-    }, 100);
+    }, 500);
 }
 
+// 通话模块辅助函数
+function toggleFullscreenById(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    if (!document.fullscreenElement) {
+        if (el.requestFullscreen) el.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+}
 
+function openInNewTab(url) {
+    try {
+        window.open(url, '_blank');
+    } catch (e) {
+        console.log('无法在新窗口打开:', e);
+    }
+}
 
-// 关闭弹窗事件
+// 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
     const closeBtn = modal.querySelector('.close-btn');
@@ -777,40 +467,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
+        if (e.target === modal) closeModal();
     });
     
     // 初始化所有功能
     initializeRoommateCards();
-    loadSavedImages(); // 加载保存的图片
     initializePets();
-
     initializeRules();
     initializeCountdown();
-
     initializeNavigation();
-    enablePetDragDrop(); // 启用宠物和植物的拖拽功能
-    animateFishTank(); // 启动鱼缸动画
-
+    enablePetDragDrop();
+    animateFishTank();
     
-    // 添加页面加载动画
+    // 页面加载动画
     document.body.style.opacity = '0';
     setTimeout(() => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '1';
     }, 100);
     
-    // 添加星星闪烁效果
+    // 星星闪烁效果
     setInterval(() => {
         const stars = document.querySelectorAll('.star-effect');
         stars.forEach(star => {
             if (Math.random() < 0.3) {
                 star.style.opacity = '1';
-                setTimeout(() => {
-                    star.style.opacity = '0.3';
-                }, 200);
+                setTimeout(() => star.style.opacity = '0.3', 200);
             }
         });
     }, 500);
